@@ -1,6 +1,8 @@
 use std::path::PathBuf;
 use std::process::ExitCode;
 
+use clap::Parser;
+
 mod files;
 mod specification;
 mod to_html;
@@ -56,20 +58,35 @@ fn get_documentation(project: PathBuf) -> Result<Documentation, Error> {
 
     let tests = get_spec(project, Spec::Tests, "test_plan.md", &mut errors);
 
-    if errors.is_empty() {
-        Ok(Documentation {
+    let documentation = if errors.is_empty() {
+        Documentation {
             requirements: requirements.unwrap(),
             design: design.unwrap(),
             risks: risks.unwrap(),
             tests: tests.unwrap(),
-        })
+        }
+    } else {
+        return Err(Error(errors));
+    };
+
+    let errors = check_documentation(&documentation);
+    if errors.is_empty() {
+        Ok(documentation)
     } else {
         Err(Error(errors))
     }
 }
 
+#[derive(Parser, Debug)]
+#[command(author, version, about, long_about = None)]
+struct Args {
+    #[arg(short, long)]
+    path: String,
+}
+
 fn main() -> ExitCode {
-    let project = PathBuf::from("./tests/project1/documentation");
+    let args = Args::parse();
+    let project = PathBuf::from(args.path);
 
     let maybe_documentation = get_documentation(project);
     let documentation = match maybe_documentation {
@@ -80,14 +97,6 @@ fn main() -> ExitCode {
             }
             return ExitCode::FAILURE;
         }
-    };
-
-    let errors = check_documentation(&documentation);
-    if !errors.is_empty() {
-        for error in errors {
-            println!("ERROR: {error}");
-        }
-        return ExitCode::FAILURE;
     };
 
     let result = to_html::to_html(documentation);

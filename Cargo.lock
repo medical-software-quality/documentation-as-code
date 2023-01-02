@@ -782,10 +782,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "quality_rs"
+name = "quality"
 version = "0.1.0"
 dependencies = [
  "assert_cmd",
+ "clap",
  "cucumber",
  "either",
  "futures",

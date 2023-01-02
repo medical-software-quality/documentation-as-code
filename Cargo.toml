@@ -1,5 +1,5 @@
 [package]
-name = "quality_rs"
+name = "quality"
 version = "0.1.0"
 edition = "2021"
 
@@ -12,6 +12,7 @@ pulldown-cmark = "0.9.2"
 either = "1"
 regex = "1"
 lazy_static = "1"
+clap = "4"
 
 [dev-dependencies]
 cucumber = "*"
