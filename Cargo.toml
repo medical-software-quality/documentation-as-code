@@ -3,8 +3,18 @@ name = "quality_rs"
 version = "0.1.0"
 edition = "2021"
 
+[[test]]
+name = "main"
+harness = false  # allows Cucumber to print output instead of libtest
+
 [dependencies]
 pulldown-cmark = "0.9.2"
 either = "1"
 regex = "1"
 lazy_static = "1"
+
+[dev-dependencies]
+cucumber = "*"
+futures = "0.3"
+# test CLI
+assert_cmd = "2.0.7"

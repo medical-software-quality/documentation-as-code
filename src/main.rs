@@ -7,6 +7,8 @@ mod to_html;
 
 use specification::*;
 
+struct Error(Vec<String>);
+
 fn get_spec(
     project: PathBuf,
     spec: Spec,
@@ -28,9 +30,7 @@ fn get_spec(
     Some((content, headings, trace))
 }
 
-fn main() -> ExitCode {
-    let project = PathBuf::from("./tests/project1/documentation");
-
+fn get_documentation(project: PathBuf) -> Result<Documentation, Error> {
     let mut errors = vec![];
 
     let requirements = get_spec(
@@ -56,25 +56,30 @@ fn main() -> ExitCode {
 
     let tests = get_spec(project, Spec::Tests, "test_plan.md", &mut errors);
 
-    let (requirements, design, risks, tests) = if errors.is_empty() {
-        (
-            requirements.unwrap(),
-            design.unwrap(),
-            risks.unwrap(),
-            tests.unwrap(),
-        )
+    if errors.is_empty() {
+        Ok(Documentation {
+            requirements: requirements.unwrap(),
+            design: design.unwrap(),
+            risks: risks.unwrap(),
+            tests: tests.unwrap(),
+        })
     } else {
-        for error in errors {
-            println!("ERROR: {error}");
-        }
-        return ExitCode::FAILURE;
-    };
+        Err(Error(errors))
+    }
+}
 
-    let documentation = Documentation {
-        requirements,
-        design,
-        risks,
-        tests,
+fn main() -> ExitCode {
+    let project = PathBuf::from("./tests/project1/documentation");
+
+    let maybe_documentation = get_documentation(project);
+    let documentation = match maybe_documentation {
+        Ok(documentation) => documentation,
+        Err(Error(errors)) => {
+            for error in errors {
+                println!("ERROR: {error}");
+            }
+            return ExitCode::FAILURE;
+        }
     };
 
     let errors = check_documentation(&documentation);
