@@ -1,5 +1,10 @@
-Feature: FS-1 - solution specification are Gherkin feature files
-  Scenario: solution's specification is in documentation/features
-    Given a solution in a directory without any documentation
-    When its documentation is checked
-    Then the check fails
+Feature: FS-1 - solution must contain a risk assessment
+  Scenario: solution does not contain documentation/risk_assessment.md
+    Given a solution without any documentation
+    When we check its documentation
+    Then we get an error of a missing risk assessemnt file
+
+  Scenario: solution contains documentation/risk_assessment.md
+    Given a solution with a valid risk assessment
+    When we check its documentation
+    Then we get no error
