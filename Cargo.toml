@@ -19,3 +19,4 @@ cucumber = "*"
 futures = "0.3"
 # test CLI
 assert_cmd = "2.0.7"
+predicates = "2"

@@ -1,12 +1,12 @@
 use cucumber::{given, then, when, World as _};
 
-use std::process::Command; // Run programs
+use assert_cmd::Command;
 
 #[test]
 fn file_doesnt_exist() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("quality")?;
 
-    cmd.arg("foobar").arg("test/file/doesnt/exist");
+    cmd.arg("path").arg("test/file/doesnt/exist");
     cmd.assert()
         .failure()
         .stderr(predicate::str::contains("could not read file"));
@@ -20,13 +20,19 @@ struct World {
 }
 
 #[given(expr = "a solution")]
-fn someone_is_hungry(w: &mut World) {
+fn a_solution(w: &mut World) {
     w.path = "./tests/project1".to_string();
 }
 
-#[when(expr = "it contains a directory `documentation/features`")]
-fn eat_cucumbers(w: &mut World) {
-    w.capacity += count;
+#[when(expr = "its documentation is checked")]
+fn check_docs(w: &mut World) {
+    let mut cmd = Command::cargo_bin("quality").unwrap();
+
+    cmd.arg("path").arg("test/file/doesnt/exist");
+
+    cmd.assert()
+        .failure()
+        .stderr(predicate::str::contains("could not read file"));
 
     assert!(w.capacity < 4, "{} exploded!", w.user.as_ref().unwrap());
 }
