@@ -35,12 +35,7 @@ fn get_spec(
 fn get_documentation(project: PathBuf) -> Result<Documentation, Error> {
     let mut errors = vec![];
 
-    let requirements = get_spec(
-        project.clone(),
-        Spec::Requirements,
-        "user_requirements_specification.md",
-        &mut errors,
-    );
+    let requirements = get_specification(project.clone(), &mut errors);
 
     let design = get_spec(
         project.clone(),
@@ -60,7 +55,7 @@ fn get_documentation(project: PathBuf) -> Result<Documentation, Error> {
 
     let documentation = if errors.is_empty() {
         Documentation {
-            requirements: requirements.unwrap(),
+            requirements,
             design: design.unwrap(),
             risks: risks.unwrap(),
             tests: tests.unwrap(),

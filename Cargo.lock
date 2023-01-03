@@ -817,6 +817,7 @@ dependencies = [
  "cucumber",
  "either",
  "futures",
+ "gherkin",
  "lazy_static",
  "predicates",
  "pulldown-cmark",

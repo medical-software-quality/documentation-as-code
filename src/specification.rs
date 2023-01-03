@@ -1,9 +1,13 @@
 use std::collections::HashSet;
+use std::path::PathBuf;
 
 use either::Either;
+use gherkin::{Feature, GherkinEnv};
 use lazy_static::lazy_static;
 use pulldown_cmark::{Event, HeadingLevel, Parser, Tag};
 use regex::Regex;
+
+use super::files;
 
 #[derive(Debug, Clone, Copy)]
 pub enum Spec {
@@ -15,7 +19,7 @@ pub enum Spec {
 
 #[derive(Debug)]
 pub struct Documentation {
-    pub requirements: (String, Headings, Trace),
+    pub requirements: (Vec<String>, Headings),
     pub design: (String, Headings, Trace),
     pub risks: (String, Headings, Trace),
     pub tests: (String, Headings, Trace),
@@ -118,9 +122,9 @@ fn check_ids(headings: &Headings, spec: Spec) -> Vec<String> {
     let errors: Vec<String> = match spec {
         Spec::Requirements => headings
             .iter()
-            .filter(|heading| !heading.starts_with("URS-"))
+            .filter(|heading| !heading.starts_with("FS-"))
             .map(|heading| {
-                format!("Headings in URS must start with \"URS-\". \"{heading}\" does not.")
+                format!("Headings in requirements must start with \"FS-\". \"{heading}\" does not.")
             })
             .collect(),
         Spec::Design => headings
@@ -186,7 +190,6 @@ pub fn check_documentation(document: &Documentation) -> Vec<String> {
     let tests_trace = &document.tests.2;
     let risks_trace = &document.risks.2;
     let design_trace = &document.design.2;
-    let requirements_trace = &document.requirements.2;
     let risks = &document.risks.1;
     let tests = &document.tests.1;
     let design = &document.design.1;
@@ -228,19 +231,68 @@ pub fn check_documentation(document: &Documentation) -> Vec<String> {
         }
     }
 
-    for (requirement, value) in requirements_trace {
-        let in_other = risks.contains(value)
-            || tests.contains(value)
-            || design.contains(value)
-            || requirements.contains(value);
-        if in_other {
-            errors.push(format!("Requirements can not be traced, but {requirement} is traced to a risk, test, design or another requirement"));
-        } else {
-            errors.push(format!(
-                "Requirements can not be traced, but {requirement} is traced to something"
-            ));
-        }
-    }
-
     errors
+}
+
+pub fn get_specification(project: PathBuf, errors: &mut Vec<String>) -> (Vec<String>, Headings) {
+    let path = project.join("features");
+
+    let paths = match files::list_directory(path) {
+        Ok(paths) => paths,
+        Err(error) => {
+            errors.push(error);
+            return Default::default();
+        }
+    };
+
+    let mut headings = HashSet::new();
+    let paths = paths;
+
+    let contents = paths
+        .into_iter()
+        // get Gherkin feature files
+        .filter(|path| path.extension().unwrap_or_default() == "feature")
+        // open the file
+        .filter_map(|path| {
+            let content = match files::read_file(path) {
+                Ok(content) => Some(content),
+                Err(error) => {
+                    errors.push(error);
+                    None
+                }
+            };
+
+            // parse it as a Gherkin feature
+            let content =
+                content.and_then(
+                    |content| match Feature::parse(&content, GherkinEnv::default()) {
+                        Ok(feature) => Some((content, feature)),
+                        Err(error) => {
+                            errors.push(error.to_string());
+                            None
+                        }
+                    },
+                );
+
+            // parse its header
+            content.map(|(content, feature)| {
+                let id = extract_identifier(&feature.name);
+                if let Some(id) = id {
+                    if !headings.insert(id.to_string()) {
+                        errors.push(format!("Headings must be unique, but {id} is not"))
+                    }
+                } else {
+                    errors.push(
+                        format!("Every feature must contain a heading with a valid identifier followed by a title, but {:?} is not", feature
+                        .name),
+                    );
+                }
+                content
+            })
+        })
+        .collect();
+
+    errors.extend(check_ids(&headings, Spec::Requirements));
+
+    (contents, headings)
 }

@@ -6,5 +6,3 @@ GxP regulations.
 This risk is mitigated by both automated tests and a manual acceptance test.
 
 ## Trace
-
-* 

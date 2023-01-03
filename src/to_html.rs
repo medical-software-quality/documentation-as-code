@@ -38,10 +38,6 @@ fn heading(spec: Spec) -> std::array::IntoIter<pulldown_cmark::Event<'static>, 3
 }
 
 pub fn to_html(documentation: Documentation) -> String {
-    let requirements = Parser::new(&documentation.requirements.0);
-    let requirements = requirements.map(heading_down);
-    let requirements = heading(Spec::Requirements).chain(requirements);
-
     let design = Parser::new(&documentation.design.0);
     let design = design.map(heading_down);
     let design = heading(Spec::Design).chain(design);
@@ -54,9 +50,10 @@ pub fn to_html(documentation: Documentation) -> String {
     let tests = tests.map(heading_down);
     let tests = heading(Spec::Tests).chain(tests);
 
-    let document = requirements.chain(design).chain(risks).chain(tests);
+    let document = design.chain(risks).chain(tests);
 
     let mut html_output = String::new();
+    // todo: add requirements
     html::push_html(&mut html_output, document);
     html_output
 }
