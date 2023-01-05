@@ -59,7 +59,7 @@ Feature: FS-1
     When we check it
     Then we get an error regarding a wrong identifier
 
-  Scenario: software is not specified
+  Example: software is not specified
     Given software without a specification
     When we check its documentation
     Then we get an error of a missing specification

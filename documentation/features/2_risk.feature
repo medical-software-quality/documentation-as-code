@@ -13,11 +13,11 @@ Feature: FS-2 - solution must contain a risk assessment
   risks that have been significantly mitigated may not be part of the assessment.
   Note that risks are always assessed against the software specification.
 
-  The risk assessment is documented in a single markdown file, itimized by headings (h1).
+  The risk assessment is documented in a single markdown file, itemized by headings (h1).
   See examples below.
 
-  Example: solution with a valid documentation/risk_assessment.md
-    Given the following valid risk assessment
+  Example: a valid risk assessment
+    Given the following risk assessment in `risk_assessment.md`
       """
       # RISK-1 - Risk of outdated records prior to submission
 
@@ -34,7 +34,42 @@ Feature: FS-2 - solution must contain a risk assessment
     When we check its documentation
     Then we get no error
 
-  Scenario: solution without documentation/risk_assessment.md
+  Example: no risk assessment
     Given a solution without any documentation
     When we check its documentation
-    Then we get an error of a missing risk assessemnt file
+    Then we get an error of a missing risk assessment file
+
+  Example: headings of the risk assessment must be of the form `# RISK-X - title`
+    Given the following risk assessment in `risk_assessment.md`
+      """
+      # Risk 1 - this
+      """
+    When we check its documentation
+    Then we get an error of an incorrect risk assessment
+
+  Example: risk assessment with a trace to existing features
+    Given the following risk assessment in `risk_assessment.md`
+      """
+    # RISK-1 - Example
+    ## Trace
+    * FS-1
+      """
+    And the following feature
+      """
+Feature: FS-1 - something
+  Scenario: Something
+    When something
+    Then something else
+      """
+    When we check its documentation
+    Then we get no error
+
+  Example: risk assessment with a trace to a non-existing feature
+    Given the following risk assessment in `risk_assessment.md`
+      """
+    # RISK-1 - Example
+    ## Trace
+    * FS-1
+      """
+    When we check its documentation
+    Then we get an error regarding a wrong trace

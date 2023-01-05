@@ -40,7 +40,7 @@ fn a_feature(w: &mut World, step: &Step) {
     w.path = create_local_project(step.docstring.as_ref().unwrap(), "");
 }
 
-#[given(expr = "the following risk assessment")]
+#[given(expr = "the following risk assessment in `risk_assessment.md`")]
 #[given(expr = "the following valid risk assessment")]
 fn a_risk(w: &mut World, step: &Step) {
     w.path = create_local_project("", step.docstring.as_ref().unwrap());
@@ -67,14 +67,26 @@ fn check_docs(w: &mut World) {
     w.command = Some(cmd);
 }
 
-#[then("we get an error of a missing risk assessemnt file")]
+#[then("we get an error of a missing risk assessment file")]
 fn check_fails(w: &mut World) {
+    let command = std::mem::take(&mut w.command);
+    command.unwrap().assert().failure().stdout(
+        predicates::str::contains("ERROR").and(predicates::str::contains("risk_assessment.md")),
+    );
+}
+
+#[then("we get an error of an incorrect risk assessment")]
+fn check_fails_identifier_risk(w: &mut World) {
     let command = std::mem::take(&mut w.command);
     command
         .unwrap()
         .assert()
         .failure()
-        .stdout(predicates::str::contains("risk_assessment.md"));
+        .stdout(
+            predicates::str::contains("ERROR").and(predicates::str::contains(
+                "Headings in risk assessment must start with \"RISK-\". \"Risk 1\" does not.",
+            )),
+        );
 }
 
 #[then("we get an error of a missing specification")]
@@ -97,6 +109,20 @@ fn check_fails_identifier(w: &mut World) {
         .stdout(
             predicates::str::contains("ERROR").and(predicates::str::contains(
                 "must contain a heading with a valid identifier followed by a title",
+            )),
+        );
+}
+
+#[then("we get an error regarding a wrong trace")]
+fn check_fails_identifier_trace(w: &mut World) {
+    let command = std::mem::take(&mut w.command);
+    command
+        .unwrap()
+        .assert()
+        .failure()
+        .stdout(
+            predicates::str::contains("ERROR").and(predicates::str::contains(
+                "Risks can only be traced to existing requirements or designs, but RISK-1 traces to something else",
             )),
         );
 }

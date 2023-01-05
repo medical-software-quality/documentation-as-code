@@ -131,21 +131,21 @@ fn check_ids(headings: &Headings, spec: Spec) -> Vec<String> {
             .iter()
             .filter(|heading| !heading.starts_with("DS-"))
             .map(|heading| {
-                format!("Headings in Design must start with \"DS-\". \"{heading}\" does not.")
+                format!("Headings in design specification must start with \"DS-\". \"{heading}\" does not.")
             })
             .collect(),
         Spec::Risks => headings
             .iter()
             .filter(|heading| !heading.starts_with("RISK-"))
             .map(|heading| {
-                format!("Headings in Risk assessment must start with \"RISK-\". \"{heading}\" does not.")
+                format!("Headings in risk assessment must start with \"RISK-\". \"{heading}\" does not.")
             })
             .collect(),
         Spec::Tests => headings
             .iter()
             .filter(|heading| !heading.starts_with("TEST-"))
             .map(|heading| {
-                format!("Headings in TEST assessment must start with \"TEST-\". \"{heading}\" does not.")
+                format!("Headings in test plan must start with \"TEST-\". \"{heading}\" does not.")
             })
             .collect(),
     };
@@ -200,9 +200,9 @@ pub fn check_documentation(document: &Documentation) -> Vec<String> {
         if !is_valid {
             let in_other = tests.contains(value) || design.contains(value);
             if in_other {
-                errors.push(format!("Tests can only be traced to risks or requirements, but {test} is traced to a design or test"));
+                errors.push(format!("Tests can only be traced to existing risks or requirements, but {test} is traced to a design or test"));
             } else {
-                errors.push(format!("Tests can only be traced to risks or requirements, but {test} is traced to something else"));
+                errors.push(format!("Tests can only be traced to existing risks or requirements, but {test} is traced to something else"));
             }
         }
     }
@@ -212,9 +212,9 @@ pub fn check_documentation(document: &Documentation) -> Vec<String> {
         if !is_valid {
             let in_other = risks.contains(value) || tests.contains(value);
             if in_other {
-                errors.push(format!("Risks can only be traced to requirements or designs, but {risk} traces to a risk or test"));
+                errors.push(format!("Risks can only be traced to existing requirements or designs, but {risk} traces to a risk or test"));
             } else {
-                errors.push(format!("Risks can only be traced to requirements or designs, but {risk} traces to something else"));
+                errors.push(format!("Risks can only be traced to existing requirements or designs, but {risk} traces to something else"));
             }
         }
     }
@@ -224,9 +224,9 @@ pub fn check_documentation(document: &Documentation) -> Vec<String> {
         if !is_valid {
             let in_other = risks.contains(value) || tests.contains(value) || design.contains(value);
             if in_other {
-                errors.push(format!("Designs can only be traced to requirements, but {design} is traced to a risk, test or another design"));
+                errors.push(format!("Designs can only be traced to existing requirements, but {design} is traced to a risk, test or another design"));
             } else {
-                errors.push(format!("Designs can only be traced to requirements, but {design} is traced to something else"));
+                errors.push(format!("Designs can only be traced to existing requirements, but {design} is traced to something else"));
             }
         }
     }
