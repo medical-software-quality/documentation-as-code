@@ -3,7 +3,7 @@ use cucumber::{given, then, when, World as _};
 use gherkin::Step;
 use predicates::prelude::PredicateBooleanExt;
 
-fn create_local_project(spec: &str, risk: &str) -> std::path::PathBuf {
+fn create_local_project(spec: &str, design: &str, risk: &str) -> std::path::PathBuf {
     let dir = std::env::temp_dir();
     let dir = dir.join("project");
     let _ = std::fs::remove_dir_all(&dir);
@@ -13,7 +13,7 @@ fn create_local_project(spec: &str, risk: &str) -> std::path::PathBuf {
         let path = dir.join("features").join("some.feature");
         std::fs::write(path, spec).unwrap();
     }
-    std::fs::write(dir.join("design_specification.md"), "").unwrap();
+    std::fs::write(dir.join("design_specification.md"), design).unwrap();
     std::fs::write(dir.join("risk_assessment.md"), risk).unwrap();
     std::fs::write(dir.join("test_plan.md"), "").unwrap();
     dir
@@ -37,13 +37,18 @@ fn an_invalid_documentation(w: &mut World) {
 
 #[given(expr = "the following feature")]
 fn a_feature(w: &mut World, step: &Step) {
-    w.path = create_local_project(step.docstring.as_ref().unwrap(), "");
+    w.path = create_local_project(step.docstring.as_ref().unwrap(), "", "");
 }
 
-#[given(expr = "the following risk assessment in `risk_assessment.md`")]
+#[given(expr = "the following content in `risk_assessment.md`")]
 #[given(expr = "the following valid risk assessment")]
 fn a_risk(w: &mut World, step: &Step) {
-    w.path = create_local_project("", step.docstring.as_ref().unwrap());
+    w.path = create_local_project("", "", step.docstring.as_ref().unwrap());
+}
+
+#[given(expr = "the following content in `design_specification.md`")]
+fn a_design(w: &mut World, step: &Step) {
+    w.path = create_local_project("", step.docstring.as_ref().unwrap(), "");
 }
 
 #[given("the following invalid specification")]
@@ -68,10 +73,19 @@ fn check_docs(w: &mut World) {
 }
 
 #[then("we get an error of a missing risk assessment file")]
-fn check_fails(w: &mut World) {
+fn missing_risk(w: &mut World) {
     let command = std::mem::take(&mut w.command);
     command.unwrap().assert().failure().stdout(
         predicates::str::contains("ERROR").and(predicates::str::contains("risk_assessment.md")),
+    );
+}
+
+#[then("we get an error of a missing design specification")]
+fn missing_design(w: &mut World) {
+    let command = std::mem::take(&mut w.command);
+    command.unwrap().assert().failure().stdout(
+        predicates::str::contains("ERROR")
+            .and(predicates::str::contains("design_specification.md")),
     );
 }
 
@@ -87,6 +101,20 @@ fn check_fails_identifier_risk(w: &mut World) {
                 "Headings in risk assessment must start with \"RISK-\". \"Risk 1\" does not.",
             )),
         );
+}
+
+#[then("we get an error of an incorrect design specification")]
+fn check_fails_identifier_design(w: &mut World) {
+    let command = std::mem::take(&mut w.command);
+    command
+        .unwrap()
+        .assert()
+        .failure()
+        .stdout(predicates::str::contains("ERROR").and(
+        predicates::str::contains(
+            "Headings in design specification must start with \"DS-\". \"Somethinf 1\" does not.",
+        ),
+    ));
 }
 
 #[then("we get an error of a missing specification")]
@@ -113,8 +141,8 @@ fn check_fails_identifier(w: &mut World) {
         );
 }
 
-#[then("we get an error regarding a wrong trace")]
-fn check_fails_identifier_trace(w: &mut World) {
+#[then("we get an error regarding a wrong trace in risks")]
+fn check_fails_identifier_trace_risk(w: &mut World) {
     let command = std::mem::take(&mut w.command);
     command
         .unwrap()
@@ -123,6 +151,20 @@ fn check_fails_identifier_trace(w: &mut World) {
         .stdout(
             predicates::str::contains("ERROR").and(predicates::str::contains(
                 "Risks can only be traced to existing requirements or designs, but RISK-1 traces to something else",
+            )),
+        );
+}
+
+#[then("we get an error regarding a wrong trace in design")]
+fn check_fails_identifier_trace_design(w: &mut World) {
+    let command = std::mem::take(&mut w.command);
+    command
+        .unwrap()
+        .assert()
+        .failure()
+        .stdout(
+            predicates::str::contains("ERROR").and(predicates::str::contains(
+                "Designs can only be traced to existing requirements, but DS-1 is traced to something else",
             )),
         );
 }

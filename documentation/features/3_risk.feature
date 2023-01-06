@@ -1,4 +1,4 @@
-Feature: FS-2 - solution must contain a risk assessment
+Feature: FS-3 - solution must contain a risk assessment
   The software's risk must be assessed. The risk assessment must enumerate
   risks that the software has that may impact any of the following:
   - Patient safety
@@ -17,7 +17,7 @@ Feature: FS-2 - solution must contain a risk assessment
   See examples below.
 
   Example: a valid risk assessment
-    Given the following risk assessment in `risk_assessment.md`
+    Given the following content in `risk_assessment.md`
       """
       # RISK-1 - Risk of outdated records prior to submission
 
@@ -40,7 +40,7 @@ Feature: FS-2 - solution must contain a risk assessment
     Then we get an error of a missing risk assessment file
 
   Example: headings of the risk assessment must be of the form `# RISK-X - title`
-    Given the following risk assessment in `risk_assessment.md`
+    Given the following content in `risk_assessment.md`
       """
       # Risk 1 - this
       """
@@ -48,7 +48,7 @@ Feature: FS-2 - solution must contain a risk assessment
     Then we get an error of an incorrect risk assessment
 
   Example: risk assessment with a trace to existing features
-    Given the following risk assessment in `risk_assessment.md`
+    Given the following content in `risk_assessment.md`
       """
     # RISK-1 - Example
     ## Trace
@@ -65,11 +65,11 @@ Feature: FS-1 - something
     Then we get no error
 
   Example: risk assessment with a trace to a non-existing feature
-    Given the following risk assessment in `risk_assessment.md`
+    Given the following content in `risk_assessment.md`
       """
     # RISK-1 - Example
     ## Trace
     * FS-1
       """
     When we check its documentation
-    Then we get an error regarding a wrong trace
+    Then we get an error regarding a wrong trace in risks
