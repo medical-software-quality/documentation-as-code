@@ -9,6 +9,9 @@ Feature: FS-2 - solution must contain a design specification
     The design specification is documented in a single markdown file, itemized by headings (h1).
     See examples below.
 
+    The complete design specification of the software must be specified as above, and
+    the design specification must only specify the software.
+
     Example: a valid design specification
         Given the following content in `design_specification.md`
             """
@@ -20,7 +23,7 @@ Feature: FS-2 - solution must contain a design specification
         Then we get no error
 
     Example: no design specification
-        Given a solution without any documentation
+        Given software without any documentation
         When we check its documentation
         Then we get an error of a missing design specification
 

@@ -16,6 +16,9 @@ Feature: FS-3 - solution must contain a risk assessment
   The risk assessment is documented in a single markdown file, itemized by headings (h1).
   See examples below.
 
+  The complete risk assessment of the software must be specified as above, and
+  the risk assessment must only assess risks of this software.
+
   Example: a valid risk assessment
     Given the following content in `risk_assessment.md`
       """
@@ -35,7 +38,7 @@ Feature: FS-3 - solution must contain a risk assessment
     Then we get no error
 
   Example: no risk assessment
-    Given a solution without any documentation
+    Given software without any documentation
     When we check its documentation
     Then we get an error of a missing risk assessment file
 

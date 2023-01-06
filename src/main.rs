@@ -51,7 +51,7 @@ fn get_documentation(project: PathBuf) -> Result<Documentation, Error> {
         &mut errors,
     );
 
-    let tests = get_spec(project, Spec::Tests, "test_plan.md", &mut errors);
+    let tests = get_spec(project, Spec::Tests, "verification_plan.md", &mut errors);
 
     let documentation = if errors.is_empty() {
         Documentation {

@@ -145,7 +145,7 @@ fn check_ids(headings: &Headings, spec: Spec) -> Vec<String> {
             .iter()
             .filter(|heading| !heading.starts_with("TEST-"))
             .map(|heading| {
-                format!("Headings in test plan must start with \"TEST-\". \"{heading}\" does not.")
+                format!("Headings in verification plan must start with \"TEST-\". \"{heading}\" does not.")
             })
             .collect(),
     };

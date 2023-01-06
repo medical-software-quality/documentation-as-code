@@ -7,6 +7,9 @@ Feature: FS-1 - software must be specified
 
   The Gherkin feature must start with `FS-`, followed by ` - ` and a title.
 
+  The complete specification of the software must be specified as above, and
+  the specification must only specify the software.
+
   Example: valid feature title
     Given the following feature
       """
