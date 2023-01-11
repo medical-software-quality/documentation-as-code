@@ -25,7 +25,6 @@ pub type Requirements = IndexMap<String, String>;
 #[derive(Debug, Serialize, Default)]
 pub struct Document {
     text: String, // markdown
-    #[serde(with = "indexmap::serde_seq")]
     trace: Trace,
 }
 
@@ -43,7 +42,6 @@ impl Document {
 
 #[derive(Debug, Serialize)]
 pub struct Documents {
-    #[serde(with = "indexmap::serde_seq")]
     requirements: Requirements,
     design_specification: Document,
     risk_assessment: Document,

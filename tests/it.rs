@@ -13,86 +13,86 @@ fn create_local_project(spec: &str, design: &str, risk: &str, test: &str) -> std
         let path = dir.join("features").join("some.feature");
         std::fs::write(path, spec).unwrap();
     }
-    std::fs::write(dir.join("design_specification.md"), design).unwrap();
-    std::fs::write(dir.join("risk_assessment.md"), risk).unwrap();
-    std::fs::write(dir.join("verification_plan.md"), test).unwrap();
+    if !design.is_empty() {
+        std::fs::write(dir.join("design_specification.md"), design).unwrap();
+    } else {
+        std::fs::write(
+            dir.join("design_specification.md"),
+            "# Design specification",
+        )
+        .unwrap();
+    }
+    if !risk.is_empty() {
+        std::fs::write(dir.join("risk_assessment.md"), risk).unwrap();
+    } else {
+        std::fs::write(dir.join("risk_assessment.md"), "# Risk assessment").unwrap();
+    }
+    if !test.is_empty() {
+        std::fs::write(dir.join("verification_plan.md"), test).unwrap();
+    } else {
+        std::fs::write(dir.join("verification_plan.md"), "# Verification plan").unwrap();
+    }
     dir
 }
 
 #[derive(cucumber::World, Debug, Default)]
 struct World {
-    path: std::path::PathBuf,
+    feature: String,
+    risk_assessment: String,
+    verification_plan: String,
+    design_specification: String,
+    has_spec: bool,
     command: Option<Command>,
 }
 
 #[given(expr = "software without a specification")]
-fn software_unspecified(w: &mut World) {
-    w.path = "./tests/fixtures/not_a_directory".into();
-}
-
 #[given(expr = "software without any documentation")]
-fn an_invalid_documentation(w: &mut World) {
-    w.path = "./tests/fixtures/not_a_directory".into();
+fn software_unspecified(w: &mut World) {
+    w.has_spec = false;
 }
 
 #[given(expr = "the following feature")]
 fn a_feature(w: &mut World, step: &Step) {
-    w.path = create_local_project(
-        step.docstring.as_ref().unwrap(),
-        "# Design specification",
-        "# Risk assessment",
-        "# Verification plan",
-    );
+    w.feature = step.docstring.as_ref().unwrap().clone();
+    w.has_spec = true;
 }
 
 #[given(expr = "the following content in `design_specification.md`")]
 fn a_design(w: &mut World, step: &Step) {
-    w.path = create_local_project(
-        "",
-        step.docstring.as_ref().unwrap(),
-        "# Risk assessment",
-        "# Verification plan",
-    );
+    w.design_specification = step.docstring.as_ref().unwrap().clone();
+    w.has_spec = true;
 }
 
 #[given(expr = "the following content in `risk_assessment.md`")]
 #[given(expr = "the following valid risk assessment")]
 fn a_risk(w: &mut World, step: &Step) {
-    w.path = create_local_project(
-        "",
-        "# Design specification",
-        step.docstring.as_ref().unwrap(),
-        "# Verification plan",
-    );
+    w.risk_assessment = step.docstring.as_ref().unwrap().clone();
+    w.has_spec = true;
 }
 
 #[given(expr = "the following content in `verification_plan.md`")]
 fn a_test(w: &mut World, step: &Step) {
-    w.path = create_local_project(
-        "",
-        "# Design specification",
-        "# Risk assessment",
-        step.docstring.as_ref().unwrap(),
-    );
-}
-
-#[given("the following invalid specification")]
-fn invalid_specification(w: &mut World) {
-    w.path = "./tests/fixtures/not_a_directory".into();
-}
-
-#[given(expr = "sofware correctly specified")]
-#[given(expr = "software with a valid risk assessment")]
-fn a_valid_documentation(w: &mut World) {
-    w.path = "./tests/fixtures/valid_project".into();
+    w.verification_plan = step.docstring.as_ref().unwrap().clone();
+    w.has_spec = true;
 }
 
 #[when(expr = "we check its documentation")]
 #[when(expr = "we check it")]
 fn check_docs(w: &mut World) {
+    let path = if w.has_spec {
+        create_local_project(
+            &w.feature,
+            &w.design_specification,
+            &w.risk_assessment,
+            &w.verification_plan,
+        )
+    } else {
+        "./not_a_directory".into()
+    };
+
     let mut cmd = Command::cargo_bin("quality").unwrap();
 
-    cmd.arg("--path").arg(&w.path);
+    cmd.arg("--path").arg(&path);
 
     w.command = Some(cmd);
 }
@@ -259,6 +259,17 @@ fn check_fails_gherkin(w: &mut World) {
 fn check_ok(w: &mut World) {
     let command = std::mem::take(&mut w.command);
     command.unwrap().assert().success();
+}
+
+#[then("we get the following JSON")]
+fn check_json(w: &mut World, step: &Step) {
+    let command = std::mem::take(&mut w.command);
+    let assert = command.unwrap().assert().success();
+    let output = assert.get_output();
+    assert_eq!(
+        serde_json::from_slice::<serde_json::Value>(&output.stdout).unwrap(),
+        serde_json::from_str::<serde_json::Value>(step.docstring.as_ref().unwrap()).unwrap()
+    );
 }
 
 fn main() {

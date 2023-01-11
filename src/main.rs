@@ -86,7 +86,7 @@ fn main() -> ExitCode {
         }
     };
 
-    let result = serde_json::to_string(&documents).unwrap();
+    let result = serde_json::to_string_pretty(&documents).unwrap();
 
     println!("{result}");
 
