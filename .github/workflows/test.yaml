@@ -1,0 +1,15 @@
+name: Check and test
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    name: Test full
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Rust
+        run: rustup update stable
+      - uses: Swatinem/rust-cache@v1
+      - name: Run
+        run: cargo test
