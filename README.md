@@ -101,12 +101,15 @@ to document the solution they will significantly improve the collaboration and e
 of your team in the process, resulting in a overall higher quality of the software and its
 associated documentation.
 
-## How to use (DevOps)
+## How to use
 
-You can use this repository in 3 main ways:
+You can use this repository in 2 ways:
 
 * via the docker image published on github
 * via the CLI installed via Rust's Cargo tool
+
+The CLI is specified [here](./documentation/README.md) according
+to this repositories' specification.
 
 ## Contribute and development notes
 
