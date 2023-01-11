@@ -130,4 +130,4 @@ and a version of the CLI.
 ## License
 
 This repository and all files on it are licensed according to the
-licence in [LICENSE](LICENSE.md) (MIT).
+licence in [LICENSE](LICENSE.md) (Apache 2.0).
