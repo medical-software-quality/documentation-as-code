@@ -13,7 +13,7 @@ Feature: FS-3 - solution must contain a risk assessment
   risks that have been significantly mitigated may not be part of the assessment.
   Note that risks are always assessed against the software specification.
 
-  The risk assessment is documented in a single markdown file, itemized by headings (h1).
+  The risk assessment is documented in a single markdown file, itemized by headings (h2).
   See examples below.
 
   The complete risk assessment of the software must be specified as above, and
@@ -22,7 +22,8 @@ Feature: FS-3 - solution must contain a risk assessment
   Example: a valid risk assessment
     Given the following content in `risk_assessment.md`
       """
-      # RISK-1 - Risk of outdated records prior to submission
+      # Risk assessment
+      ## RISK-1 - Risk of outdated records prior to submission
 
       As per FS-10, the solution expects users to keep the records
       of all the participants they follow updated and ready for submission.
@@ -45,7 +46,8 @@ Feature: FS-3 - solution must contain a risk assessment
   Example: headings of the risk assessment must be of the form `# RISK-X - title`
     Given the following content in `risk_assessment.md`
       """
-      # Risk 1 - this
+      # Risk assessment
+      ## Risk 1 - this
       """
     When we check its documentation
     Then we get an error of an incorrect risk assessment
@@ -53,8 +55,9 @@ Feature: FS-3 - solution must contain a risk assessment
   Example: risk assessment with a trace to existing features
     Given the following content in `risk_assessment.md`
       """
-    # RISK-1 - Example
-    ## Trace
+    # Risk assessment
+    ## RISK-1 - Example
+    ### Trace
     * FS-1
       """
     And the following feature
@@ -70,8 +73,9 @@ Feature: FS-1 - something
   Example: risk assessment with a trace to a non-existing feature
     Given the following content in `risk_assessment.md`
       """
-    # RISK-1 - Example
-    ## Trace
+    # Risk assessment
+    ## RISK-1 - Example
+    ### Trace
     * FS-1
       """
     When we check its documentation

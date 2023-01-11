@@ -8,7 +8,7 @@ Feature: FS-4 - software verification plan
   - how each of the risks (described in FS-3) mitigated by tests is mitigated
   - where is the evidence of the execution of the test stored
 
-  The test plan is documented in a single markdown file, itemized by headings (h1)
+  The test plan is documented in a single markdown file, itemized by headings (h2)
   with an optional introduction.
 
   See examples below.
@@ -16,7 +16,8 @@ Feature: FS-4 - software verification plan
   Example: a valid verification plan
     Given the following content in `verification_plan.md`
       """
-      # TEST-1 - Unit tests
+      # Verification plan
+      ## TEST-1 - Unit tests
 
       This software's individual components are tested by unit tests.
 
@@ -27,10 +28,10 @@ Feature: FS-4 - software verification plan
       prior to the deployment of the software in the production environment.
 
       These tests cover the following requirements
-      ## Trace
+      ### Trace
       - FS-1
 
-      # TEST-2 - Integration tests
+      ## TEST-2 - Integration tests
       This software's components are tested in integration with integration tests.
 
       This test is executed on an environment reproducing the production environment (UAT)
@@ -40,15 +41,15 @@ Feature: FS-4 - software verification plan
       prior to the deployment of the software in the production environment.
 
       These tests cover the following requirements
-      ## Trace
+      ### Trace
       - FS-1
 
-      # TEST-3 - Acceptance tests
+      ## TEST-3 - Acceptance tests
       This software's specification is tested by acceptance tests.
       These tests are enumerated as "scenarios" in the softwares' specification.
 
       These tests cover all specifications
-      ## Trace
+      ### Trace
       - FS-1
       """
     And the following feature
@@ -69,7 +70,8 @@ Feature: FS-1 - something
   Example: headings of the verification plan must be of the form `# TEST-X - title`
     Given the following content in `verification_plan.md`
       """
-      # Test 1 - this
+      # Verification plan
+      ## Test 1 - this
       """
     When we check its documentation
     Then we get an error of an incorrect verification plan
@@ -77,8 +79,9 @@ Feature: FS-1 - something
   Example: verification plan with a trace to existing features
     Given the following content in `verification_plan.md`
       """
-    # TEST-1 - Example
-    ## Trace
+    # Verification plan
+    ## TEST-1 - Example
+    ### Trace
     * FS-1
       """
     And the following feature
@@ -94,8 +97,9 @@ Feature: FS-1 - something
   Example: verification plan with a trace to a non-existing feature
     Given the following content in `verification_plan.md`
       """
-    # TEST-1 - Example
-    ## Trace
+    # Verification plan
+    ## TEST-1 - Example
+    ### Trace
     * FS-1
       """
     When we check its documentation

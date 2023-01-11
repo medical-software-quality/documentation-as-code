@@ -37,23 +37,43 @@ fn an_invalid_documentation(w: &mut World) {
 
 #[given(expr = "the following feature")]
 fn a_feature(w: &mut World, step: &Step) {
-    w.path = create_local_project(step.docstring.as_ref().unwrap(), "", "", "");
+    w.path = create_local_project(
+        step.docstring.as_ref().unwrap(),
+        "# Design specification",
+        "# Risk assessment",
+        "# Verification plan",
+    );
 }
 
 #[given(expr = "the following content in `design_specification.md`")]
 fn a_design(w: &mut World, step: &Step) {
-    w.path = create_local_project("", step.docstring.as_ref().unwrap(), "", "");
+    w.path = create_local_project(
+        "",
+        step.docstring.as_ref().unwrap(),
+        "# Risk assessment",
+        "# Verification plan",
+    );
 }
 
 #[given(expr = "the following content in `risk_assessment.md`")]
 #[given(expr = "the following valid risk assessment")]
 fn a_risk(w: &mut World, step: &Step) {
-    w.path = create_local_project("", "", step.docstring.as_ref().unwrap(), "");
+    w.path = create_local_project(
+        "",
+        "# Design specification",
+        step.docstring.as_ref().unwrap(),
+        "# Verification plan",
+    );
 }
 
 #[given(expr = "the following content in `verification_plan.md`")]
 fn a_test(w: &mut World, step: &Step) {
-    w.path = create_local_project("", "", "", step.docstring.as_ref().unwrap());
+    w.path = create_local_project(
+        "",
+        "# Design specification",
+        "# Risk assessment",
+        step.docstring.as_ref().unwrap(),
+    );
 }
 
 #[given("the following invalid specification")]
@@ -126,6 +146,20 @@ fn check_fails_identifier_design(w: &mut World) {
         .stdout(
             predicates::str::contains("ERROR").and(predicates::str::contains(
                 "Headings in design specification must start with \"DS-\".",
+            )),
+        );
+}
+
+#[then("we get an error of an incorrect header in design specification")]
+fn then_missing_header_in_design(w: &mut World) {
+    let command = std::mem::take(&mut w.command);
+    command
+        .unwrap()
+        .assert()
+        .failure()
+        .stdout(
+            predicates::str::contains("ERROR").and(predicates::str::contains(
+                "The document must start with \"# Design specification\" but starts with \"# Design statement\"",
             )),
         );
 }

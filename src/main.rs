@@ -5,18 +5,15 @@ use clap::Parser;
 
 mod files;
 mod specification;
-mod to_html;
 
 use specification::*;
 
-struct Error(Vec<String>);
-
-fn get_spec(
+fn get_document(
     project: PathBuf,
     spec: Spec,
     file_name: &str,
     errors: &mut Vec<String>,
-) -> Option<(String, Headings, Trace)> {
+) -> Option<Document> {
     let path = project.join(file_name);
 
     let content = match files::read_file(path) {
@@ -26,47 +23,43 @@ fn get_spec(
             return None;
         }
     };
-
-    let (headings, trace) = check_spec(&content, spec, errors)?;
-
-    Some((content, headings, trace))
+    match Document::try_new(content, spec) {
+        Ok(document) => Some(document),
+        Err(Error(new_errors)) => {
+            errors.extend(new_errors);
+            None
+        }
+    }
 }
 
-fn get_documentation(project: PathBuf) -> Result<Documentation, Error> {
+fn get_documents(project: PathBuf) -> Result<Documents, Error> {
     let mut errors = vec![];
 
     let requirements = get_specification(project.clone(), &mut errors);
 
-    let design = get_spec(
+    let design = get_document(
         project.clone(),
         Spec::Design,
         "design_specification.md",
         &mut errors,
     );
 
-    let risks = get_spec(
+    let risk_assessment = get_document(
         project.clone(),
         Spec::Risks,
         "risk_assessment.md",
         &mut errors,
     );
 
-    let tests = get_spec(project, Spec::Tests, "verification_plan.md", &mut errors);
+    let verification_plan = get_document(project, Spec::Tests, "verification_plan.md", &mut errors);
 
-    let documentation = if errors.is_empty() {
-        Documentation {
-            requirements,
-            design: design.unwrap(),
-            risks: risks.unwrap(),
-            tests: tests.unwrap(),
-        }
-    } else {
-        return Err(Error(errors));
-    };
-
-    let errors = check_documentation(&documentation);
     if errors.is_empty() {
-        Ok(documentation)
+        Documents::try_new(
+            requirements,
+            design.unwrap(),
+            risk_assessment.unwrap(),
+            verification_plan.unwrap(),
+        )
     } else {
         Err(Error(errors))
     }
@@ -83,9 +76,8 @@ fn main() -> ExitCode {
     let args = Args::parse();
     let project = PathBuf::from(args.path);
 
-    let maybe_documentation = get_documentation(project);
-    let documentation = match maybe_documentation {
-        Ok(documentation) => documentation,
+    let documents = match get_documents(project) {
+        Ok(documents) => documents,
         Err(Error(errors)) => {
             for error in errors {
                 println!("ERROR: {error}");
@@ -94,7 +86,7 @@ fn main() -> ExitCode {
         }
     };
 
-    let result = to_html::to_html(documentation);
+    let result = serde_json::to_string(&documents).unwrap();
 
     println!("{result}");
 

@@ -6,7 +6,7 @@ Feature: FS-2 - solution must contain a design specification
     - How its main components interact with each other
     - How its main components address the functional specification
 
-    The design specification is documented in a single markdown file, itemized by headings (h1).
+    The design specification is documented in a single markdown file, itemized by headings (h2).
     See examples below.
 
     The complete design specification of the software must be specified as above, and
@@ -15,9 +15,9 @@ Feature: FS-2 - solution must contain a design specification
     Example: a valid design specification
         Given the following content in `design_specification.md`
             """
-            # DS-1 - Architecture
-
-            Example of an item
+            # Design specification
+            ## DS-1 - Architecture
+            Something
             """
         When we check its documentation
         Then we get no error
@@ -27,10 +27,21 @@ Feature: FS-2 - solution must contain a design specification
         When we check its documentation
         Then we get an error of a missing design specification
 
+    Example: incorrect heading in design specification
+        Given the following content in `design_specification.md`
+            """
+            # Design statement
+            ## DS-1 - Architecture
+            Something
+            """
+        When we check its documentation
+        Then we get an error of an incorrect header in design specification
+
     Example: headings of the design assessment must be of the form `# DS-X - title`
         Given the following content in `design_specification.md`
             """
-            # Somethinf 1 - this
+            # Design specification
+            ## Somethinf 1 - this
             """
         When we check its documentation
         Then we get an error of an incorrect design specification
@@ -38,8 +49,9 @@ Feature: FS-2 - solution must contain a design specification
     Example: design specification with a trace to existing features
         Given the following content in `design_specification.md`
             """
-        # DS-1 - Example
-        ## Trace
+        # Design specification
+        ## DS-1 - Example
+        ### Trace
         * FS-1
             """
         And the following feature
@@ -55,8 +67,9 @@ Feature: FS-1 - something
     Example: design with a trace to a non-existing feature
         Given the following content in `design_specification.md`
             """
-        # DS-1 - Example
-        ## Trace
+        # Design specification
+        ## DS-1 - Example
+        ### Trace
         * FS-1
             """
         When we check its documentation

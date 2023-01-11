@@ -1,13 +1,15 @@
-use std::collections::HashSet;
 use std::path::PathBuf;
 
-use either::Either;
 use gherkin::{Feature, GherkinEnv};
+use indexmap::{IndexMap, IndexSet};
 use lazy_static::lazy_static;
 use pulldown_cmark::{Event, HeadingLevel, Parser, Tag};
 use regex::Regex;
+use serde::Serialize;
 
 use super::files;
+
+pub struct Error(pub Vec<String>);
 
 #[derive(Debug, Clone, Copy)]
 pub enum Spec {
@@ -17,17 +19,58 @@ pub enum Spec {
     Tests,
 }
 
-#[derive(Debug)]
-pub struct Documentation {
-    pub requirements: (Vec<String>, Headings),
-    pub design: (String, Headings, Trace),
-    pub risks: (String, Headings, Trace),
-    pub tests: (String, Headings, Trace),
+pub type Trace = IndexMap<String, IndexSet<String>>;
+pub type Requirements = IndexMap<String, String>;
+
+#[derive(Debug, Serialize, Default)]
+pub struct Document {
+    text: String, // markdown
+    #[serde(with = "indexmap::serde_seq")]
+    trace: Trace,
 }
 
-pub type Headings = HashSet<String>;
+impl Document {
+    pub fn try_new(text: String, spec: Spec) -> Result<Self, Error> {
+        let mut errors = vec![];
+        let trace = get_trace(&text, spec, &mut errors);
+        if errors.is_empty() {
+            Ok(Self { text, trace })
+        } else {
+            Err(Error(errors))
+        }
+    }
+}
 
-pub type Trace = HashSet<(String, String)>;
+#[derive(Debug, Serialize)]
+pub struct Documents {
+    #[serde(with = "indexmap::serde_seq")]
+    requirements: Requirements,
+    design_specification: Document,
+    risk_assessment: Document,
+    verification_plan: Document,
+}
+
+impl Documents {
+    pub fn try_new(
+        requirements: Requirements,
+        design_specification: Document,
+        risk_assessment: Document,
+        verification_plan: Document,
+    ) -> Result<Self, Error> {
+        check_documentation(
+            &requirements,
+            &verification_plan,
+            &risk_assessment,
+            &design_specification,
+        )?;
+        Ok(Self {
+            requirements,
+            design_specification,
+            risk_assessment,
+            verification_plan,
+        })
+    }
+}
 
 fn extract_identifier(input: &str) -> Option<&str> {
     lazy_static! {
@@ -47,34 +90,54 @@ enum TraceState {
     Item,
 }
 
-fn parse_headings(markdown_input: &str) -> Either<(Headings, Trace), Vec<String>> {
+fn parse(markdown_input: &str, spec: Spec) -> Result<Trace, Error> {
+    let expected_title = match spec {
+        Spec::Design => "Design specification",
+        Spec::Tests => "Verification plan",
+        Spec::Risks => "Risk assessment",
+        Spec::Requirements => unreachable!(),
+    };
+
     let parser = Parser::new(markdown_input);
 
     let mut in_heading = false;
+    let mut in_title = false;
+    let mut has_title = false;
     let mut trace_state = TraceState::None;
-    let mut last_heading = None;
-    let mut headings = Headings::new();
     let mut errors = vec![];
     let mut trace = Trace::new();
     parser.for_each(|event| match event {
         Event::Start(Tag::Heading(HeadingLevel::H1, _, _)) => {
+            in_title = true;
+            has_title = true;
+        }
+        Event::Text(inner) if in_title => {
+            if inner.as_bytes() != expected_title.as_bytes() {
+                errors.push(format!(
+                    "The document must start with \"# {expected_title}\" but starts with \"# {inner}\""
+                ))
+            }
+        }
+        Event::End(Tag::Heading(HeadingLevel::H1, _, _)) => {
+            in_title = false;
+        }
+        Event::Start(Tag::Heading(HeadingLevel::H2, _, _)) => {
             in_heading = true;
         }
         Event::Text(inner) if in_heading => {
             let id = extract_identifier(inner.as_ref());
             if let Some(id) = id {
-                last_heading = Some(id.to_string());
-                if !headings.insert(id.to_string()) {
+                if trace.insert(id.to_string(), Default::default()).is_some() {
                     errors.push(format!("Headings must be unique, but {id} is not"))
                 }
             } else {
                 errors.push(format!("Can't parse the identifier of {}", inner.as_ref()))
             }
         }
-        Event::End(Tag::Heading(HeadingLevel::H1, _, _)) => {
+        Event::End(Tag::Heading(HeadingLevel::H2, _, _)) => {
             in_heading = false;
         }
-        Event::Start(Tag::Heading(HeadingLevel::H2, _, _)) if !headings.is_empty() => {
+        Event::Start(Tag::Heading(HeadingLevel::H3, _, _)) if !trace.is_empty() => {
             trace_state = TraceState::CheckHeading;
         }
         Event::Text(inner)
@@ -82,11 +145,11 @@ fn parse_headings(markdown_input: &str) -> Either<(Headings, Trace), Vec<String>
         {
             trace_state = TraceState::Heading;
         }
-        Event::End(Tag::Heading(HeadingLevel::H2, _, _)) if trace_state == TraceState::Heading => {
+        Event::End(Tag::Heading(HeadingLevel::H3, _, _)) if trace_state == TraceState::Heading => {
             trace_state = TraceState::Body;
         }
         // if the heading is not trace, revert to no state
-        Event::End(Tag::Heading(HeadingLevel::H2, _, _))
+        Event::End(Tag::Heading(HeadingLevel::H3, _, _))
             if trace_state == TraceState::CheckHeading =>
         {
             trace_state = TraceState::None;
@@ -103,46 +166,47 @@ fn parse_headings(markdown_input: &str) -> Either<(Headings, Trace), Vec<String>
             trace_state = TraceState::Item;
         }
         Event::Text(inner) if trace_state == TraceState::Item => {
-            let heading = last_heading.clone().unwrap(); // guaranteed by !is_empty above
-            trace.insert((heading, inner.to_string()));
+            trace.last_mut().unwrap().1.insert(inner.to_string());
         }
         Event::End(Tag::Item) if trace_state == TraceState::Item => {
             trace_state = TraceState::List;
         }
         _ => {}
     });
+    if !has_title {
+        errors.push(format!(
+            "The document must start with \"# {expected_title}\""
+        ))
+    }
+
     if !errors.is_empty() {
-        Either::Right(errors)
+        Err(Error(errors))
     } else {
-        Either::Left((headings, trace))
+        Ok(trace)
     }
 }
 
-fn check_ids(headings: &Headings, spec: Spec) -> Vec<String> {
+fn check_ids<'a, I: Iterator<Item = &'a String>>(headings: I, spec: Spec) -> Vec<String> {
     let errors: Vec<String> = match spec {
         Spec::Requirements => headings
-            .iter()
             .filter(|heading| !heading.starts_with("FS-"))
             .map(|heading| {
                 format!("Headings in requirements must start with \"FS-\". \"{heading}\" does not.")
             })
             .collect(),
         Spec::Design => headings
-            .iter()
             .filter(|heading| !heading.starts_with("DS-"))
             .map(|heading| {
                 format!("Headings in design specification must start with \"DS-\". \"{heading}\" does not.")
             })
             .collect(),
         Spec::Risks => headings
-            .iter()
             .filter(|heading| !heading.starts_with("RISK-"))
             .map(|heading| {
                 format!("Headings in risk assessment must start with \"RISK-\". \"{heading}\" does not.")
             })
             .collect(),
         Spec::Tests => headings
-            .iter()
             .filter(|heading| !heading.starts_with("TEST-"))
             .map(|heading| {
                 format!("Headings in verification plan must start with \"TEST-\". \"{heading}\" does not.")
@@ -153,88 +217,102 @@ fn check_ids(headings: &Headings, spec: Spec) -> Vec<String> {
     errors
 }
 
-fn check_trace(trace: &Trace, headings: &Headings) -> Vec<String> {
+fn check_trace(trace: &Trace) -> Vec<String> {
     let mut errors = vec![];
 
-    for (key, value) in trace {
-        if headings.contains(value) {
-            errors.push(format!("Trace of {key} cannot be to other identifiers on the same specification ({value} is)"))
+    for (key, values) in trace {
+        for value in values {
+            if trace.contains_key(value) {
+                errors.push(format!(
+                    "Trace of {key} cannot be to other items on the same document ({value} is)"
+                ))
+            }
         }
     }
 
     errors
 }
 
-pub fn check_spec(
-    content: &str,
-    spec: Spec,
-    errors: &mut Vec<String>,
-) -> Option<(Headings, Trace)> {
-    let (headings, trace) = match parse_headings(content) {
-        Either::Right(document_errors) => {
+pub fn get_trace(content: &str, spec: Spec, errors: &mut Vec<String>) -> Trace {
+    let trace = match parse(content, spec) {
+        Err(Error(document_errors)) => {
             errors.extend(document_errors);
-            return None;
+            return Default::default();
         }
-        Either::Left((headings, trace)) => (headings, trace),
+        Ok(item) => item,
     };
 
-    errors.extend(check_ids(&headings, spec));
-    errors.extend(check_trace(&trace, &headings));
+    errors.extend(check_ids(trace.keys(), spec));
+    errors.extend(check_trace(&trace));
 
-    Some((headings, trace))
+    trace
 }
 
-pub fn check_documentation(document: &Documentation) -> Vec<String> {
+pub fn check_documentation(
+    requirements: &Requirements,
+    verification_plan: &Document,
+    risk_assessment: &Document,
+    design_specification: &Document,
+) -> Result<(), Error> {
     let mut errors = vec![];
 
-    let tests_trace = &document.tests.2;
-    let risks_trace = &document.risks.2;
-    let design_trace = &document.design.2;
-    let risks = &document.risks.1;
-    let tests = &document.tests.1;
-    let design = &document.design.1;
-    let requirements = &document.requirements.1;
+    let tests = &verification_plan.trace;
+    let risks = &risk_assessment.trace;
+    let designs = &design_specification.trace;
+    let requirements = &requirements;
 
-    for (test, value) in tests_trace {
-        let is_valid = risks.contains(value) || requirements.contains(value);
-        if !is_valid {
-            let in_other = tests.contains(value) || design.contains(value);
-            if in_other {
-                errors.push(format!("Tests can only be traced to existing risks or requirements, but {test} is traced to a design or test"));
-            } else {
-                errors.push(format!("Tests can only be traced to existing risks or requirements, but {test} is traced to something else"));
+    for (test, values) in tests {
+        for value in values {
+            let is_valid = risks.contains_key(value) || requirements.contains_key(value);
+            if !is_valid {
+                let in_other = tests.contains_key(value) || designs.contains_key(value);
+                if in_other {
+                    errors.push(format!("Tests can only be traced to existing risks or requirements, but {test} is traced to a design or test"));
+                } else {
+                    errors.push(format!("Tests can only be traced to existing risks or requirements, but {test} is traced to something else"));
+                }
             }
         }
     }
 
-    for (risk, value) in risks_trace {
-        let is_valid = requirements.contains(value) || design.contains(value);
-        if !is_valid {
-            let in_other = risks.contains(value) || tests.contains(value);
-            if in_other {
-                errors.push(format!("Risks can only be traced to existing requirements or designs, but {risk} traces to a risk or test"));
-            } else {
-                errors.push(format!("Risks can only be traced to existing requirements or designs, but {risk} traces to something else"));
+    for (risk, values) in risks {
+        for value in values {
+            let is_valid = requirements.contains_key(value) || designs.contains_key(value);
+            if !is_valid {
+                let in_other = risks.contains_key(value) || tests.contains_key(value);
+                if in_other {
+                    errors.push(format!("Risks can only be traced to existing requirements or designs, but {risk} traces to a risk or test"));
+                } else {
+                    errors.push(format!("Risks can only be traced to existing requirements or designs, but {risk} traces to something else"));
+                }
             }
         }
     }
 
-    for (design, value) in design_trace {
-        let is_valid = requirements.contains(value);
-        if !is_valid {
-            let in_other = risks.contains(value) || tests.contains(value) || design.contains(value);
-            if in_other {
-                errors.push(format!("Designs can only be traced to existing requirements, but {design} is traced to a risk, test or another design"));
-            } else {
-                errors.push(format!("Designs can only be traced to existing requirements, but {design} is traced to something else"));
+    for (design, values) in designs {
+        for value in values {
+            let is_valid = requirements.contains_key(value);
+            if !is_valid {
+                let in_other = risks.contains_key(value)
+                    || tests.contains_key(value)
+                    || designs.contains_key(value);
+                if in_other {
+                    errors.push(format!("Designs can only be traced to existing requirements, but {design} is traced to a risk, test or another design"));
+                } else {
+                    errors.push(format!("Designs can only be traced to existing requirements, but {design} is traced to something else"));
+                }
             }
         }
     }
 
-    errors
+    if errors.is_empty() {
+        Ok(())
+    } else {
+        Err(Error(errors))
+    }
 }
 
-pub fn get_specification(project: PathBuf, errors: &mut Vec<String>) -> (Vec<String>, Headings) {
+pub fn get_specification(project: PathBuf, errors: &mut Vec<String>) -> IndexMap<String, String> {
     let path = project.join("features");
 
     let paths = match files::list_directory(path) {
@@ -245,54 +323,48 @@ pub fn get_specification(project: PathBuf, errors: &mut Vec<String>) -> (Vec<Str
         }
     };
 
-    let mut headings = HashSet::new();
-    let paths = paths;
-
-    let contents = paths
+    let mut headings = IndexMap::new();
+    paths
         .into_iter()
         // get Gherkin feature files
         .filter(|path| path.extension().unwrap_or_default() == "feature")
-        // open the file
-        .filter_map(|path| {
+        .for_each(|path| {
+            // open the file
             let content = match files::read_file(path) {
-                Ok(content) => Some(content),
+                Ok(content) => content,
                 Err(error) => {
                     errors.push(error);
-                    None
+                    return;
                 }
             };
 
             // parse it as a Gherkin feature
-            let content =
-                content.and_then(
-                    |content| match Feature::parse(&content, GherkinEnv::default()) {
-                        Ok(feature) => Some((content, feature)),
-                        Err(error) => {
-                            errors.push(error.to_string());
-                            None
-                        }
-                    },
-                );
-
-            // parse its header
-            content.map(|(content, feature)| {
-                let id = extract_identifier(&feature.name);
-                if let Some(id) = id {
-                    if !headings.insert(id.to_string()) {
-                        errors.push(format!("Headings must be unique, but {id} is not"))
-                    }
-                } else {
-                    errors.push(
-                        format!("Every feature must contain a heading with a valid identifier followed by a title, but {:?} is not", feature
-                        .name),
-                    );
+            let feature = match Feature::parse(&content, GherkinEnv::default()) {
+                Ok(feature) => feature,
+                Err(error) => {
+                    errors.push(error.to_string());
+                    return;
                 }
-                content
-            })
-        })
-        .collect();
+            };
 
-    errors.extend(check_ids(&headings, Spec::Requirements));
+            let id = if let Some(id) = extract_identifier(&feature.name) {
+                id
+            } else {
+                errors.push(
+                    format!("Every feature must contain a heading with a valid identifier followed by a title, but {:?} is not", feature
+                    .name),
+                );
+                return;
+            };
 
-    (contents, headings)
+            if headings.contains_key(id) {
+                errors.push(format!("Headings must be unique, but {id} is not"))
+            } else {
+                headings.insert(id.to_string(), content);
+            }
+        });
+
+    errors.extend(check_ids(headings.keys(), Spec::Requirements));
+
+    headings
 }

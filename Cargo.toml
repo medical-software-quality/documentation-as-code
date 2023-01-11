@@ -13,11 +13,13 @@ harness = false  # allows Cucumber to print output instead of libtest
 
 [dependencies]
 pulldown-cmark = {version = "0.9.2", default-features = false}
-either = "1"
 regex = {version = "1", default-features = false}
 lazy_static = "1"
 clap = {version = "4", features = ["derive"]}
 gherkin = "*"
+indexmap = {version = "1", features = ["serde"]}
+serde = {version = "1", features = ["derive"]}
+serde_json = { version = "1", default-features = false, features = ["alloc"] }
 
 [dev-dependencies]
 cucumber = "*"

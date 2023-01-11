@@ -1,4 +1,6 @@
-# RISK-1 - False positives
+# Risk assessment
+
+## RISK-1 - False positives
 
 There is a risk that this application incorrectly flags documentation has not having
 an issue when it does have an issue (false negative). This risk has a low discoverability
