@@ -113,6 +113,14 @@ to this repositories' specification.
 
 ## Contribute and development notes
 
+This is a standard Rust project.
+
+To run tests:
+
+```bash
+cargo test
+```
+
 To build image:
 
 ```bash
