@@ -27,7 +27,7 @@ Feature: FS-2 - solution must contain a design specification
         When we check its documentation
         Then we get an error of a missing design specification
 
-    Example: incorrect heading in design specification
+    Example: incorrect title of design specification
         Given the following content in `design_specification.md`
             """
             # Design statement
@@ -37,7 +37,7 @@ Feature: FS-2 - solution must contain a design specification
         When we check its documentation
         Then we get an error of an incorrect header in design specification
 
-    Example: headings of the design assessment must be of the form `# DS-X - title`
+    Example: sections of the design specification must be of the form `# DS-X - title`
         Given the following content in `design_specification.md`
             """
             # Design specification

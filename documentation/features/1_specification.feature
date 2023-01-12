@@ -40,7 +40,7 @@ Feature: FS-1 - All user actions that add or modify data must be logged to form 
     When we check its documentation
     Then we get an error regarding wrong Gherkin
 
-  Example: feature missing the identifier
+  Example: feature with a wrong title
     Given the following feature
       """
 Feature: some feature

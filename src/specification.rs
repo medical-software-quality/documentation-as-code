@@ -41,13 +41,7 @@ pub struct Document {
 
 impl Document {
     pub fn try_new(text: String, spec: Spec) -> Result<Self, Error> {
-        let mut errors = vec![];
-        let trace = get_trace(&text, spec, &mut errors);
-        if errors.is_empty() {
-            Ok(Self { text, trace })
-        } else {
-            Err(Error(errors))
-        }
+        get_trace(&text, spec).map(|trace| Self { text, trace })
     }
 }
 
@@ -99,7 +93,7 @@ enum TraceState {
     Item,
 }
 
-fn parse(markdown_input: &str, spec: Spec) -> Result<Trace, Error> {
+fn parse(markdown_input: &str, spec: Spec) -> (Trace, Vec<String>) {
     let expected_title = match spec {
         Spec::Design => "Design specification",
         Spec::Tests => "Verification plan",
@@ -120,7 +114,7 @@ fn parse(markdown_input: &str, spec: Spec) -> Result<Trace, Error> {
             in_title = true;
             if has_title {
                 errors.push(format!(
-                    "\"{}\" must contain a single title (h1) with \"# {expected_title}\" but it contains at least two titles.",
+                    "\"{}\" must contain a single title (#) with \"# {expected_title}\" but it contains at least two titles.",
                     spec.file_name(),
                 ))
             }
@@ -196,11 +190,7 @@ fn parse(markdown_input: &str, spec: Spec) -> Result<Trace, Error> {
         ))
     }
 
-    if !errors.is_empty() {
-        Err(Error(errors))
-    } else {
-        Ok(trace)
-    }
+    (trace, errors)
 }
 
 fn check_ids<'a, I: Iterator<Item = &'a String>>(headings: I, spec: Spec) -> Vec<String> {
@@ -250,22 +240,20 @@ fn check_trace(trace: &Trace) -> Vec<String> {
     errors
 }
 
-pub fn get_trace(content: &str, spec: Spec, errors: &mut Vec<String>) -> Trace {
-    let trace = match parse(content, spec) {
-        Err(Error(document_errors)) => {
-            errors.extend(document_errors);
-            return Default::default();
-        }
-        Ok(item) => item,
-    };
+fn get_trace(content: &str, spec: Spec) -> Result<Trace, Error> {
+    let (trace, mut errors) = parse(content, spec);
 
     errors.extend(check_ids(trace.keys(), spec));
     errors.extend(check_trace(&trace));
 
-    trace
+    if errors.is_empty() {
+        Ok(trace)
+    } else {
+        Err(Error(errors))
+    }
 }
 
-pub fn check_documentation(
+fn check_documentation(
     requirements: &Requirements,
     verification_plan: &Document,
     risk_assessment: &Document,
@@ -347,7 +335,7 @@ pub fn get_specification(project: PathBuf, errors: &mut Vec<String>) -> IndexMap
         .filter(|path| path.extension().unwrap_or_default() == "feature")
         .for_each(|path| {
             // open the file
-            let content = match files::read_file(path) {
+            let content = match files::read_file(&path) {
                 Ok(content) => content,
                 Err(error) => {
                     errors.push(error);
@@ -368,8 +356,7 @@ pub fn get_specification(project: PathBuf, errors: &mut Vec<String>) -> IndexMap
                 id
             } else {
                 errors.push(
-                    format!("Every feature must contain a heading with a valid identifier followed by a title, but {:?} is not", feature
-                    .name),
+                    format!("Every feature's title must be of the form \"FS-<id> - <title>\", but {} in {} does not.", feature.name, path.display()),
                 );
                 return;
             };

@@ -197,7 +197,7 @@ fn check_fails_identifier(w: &mut World) {
         .failure()
         .stdout(
             predicates::str::contains("ERROR").and(predicates::str::contains(
-                "must contain a heading with a valid identifier followed by a title",
+                "Every feature's title must be of the form \"FS-<id> - <title>\"",
             )),
         );
 }

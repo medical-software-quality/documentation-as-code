@@ -18,8 +18,10 @@ jobs:
       - name: Install Rust
         run: rustup update stable
       - uses: Swatinem/rust-cache@v1
-      - name: Run
+      - name: Run TEST-1
         run: cargo test
+      - name: Test own documentation
+        run: cargo run -- --path documentation/
 
   build-and-push-image:
     runs-on: ubuntu-latest
