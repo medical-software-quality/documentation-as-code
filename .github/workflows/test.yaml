@@ -23,6 +23,7 @@ jobs:
 
   build-and-push-image:
     runs-on: ubuntu-latest
+    needs: test
     permissions:
       contents: read
       packages: write
@@ -54,6 +55,7 @@ jobs:
 
   release:
     name: Release ${{ matrix.target }}
+    needs: test
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
