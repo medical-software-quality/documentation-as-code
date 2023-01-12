@@ -19,6 +19,17 @@ pub enum Spec {
     Tests,
 }
 
+impl Spec {
+    pub fn file_name(&self) -> &'static str {
+        match self {
+            Spec::Requirements => unreachable!(),
+            Spec::Design => "design_specification.md",
+            Spec::Risks => "risk_assessment.md",
+            Spec::Tests => "verification_plan.md",
+        }
+    }
+}
+
 pub type Trace = IndexMap<String, IndexSet<String>>;
 pub type Requirements = IndexMap<String, String>;
 
@@ -107,12 +118,19 @@ fn parse(markdown_input: &str, spec: Spec) -> Result<Trace, Error> {
     parser.for_each(|event| match event {
         Event::Start(Tag::Heading(HeadingLevel::H1, _, _)) => {
             in_title = true;
+            if has_title {
+                errors.push(format!(
+                    "\"{}\" must contain a single title (h1) with \"# {expected_title}\" but it contains at least two titles.",
+                    spec.file_name(),
+                ))
+            }
             has_title = true;
         }
         Event::Text(inner) if in_title => {
             if inner.as_bytes() != expected_title.as_bytes() {
                 errors.push(format!(
-                    "The document must start with \"# {expected_title}\" but starts with \"# {inner}\""
+                    "\"{}\" must start with \"# {expected_title}\" but starts with \"# {inner}\"",
+                    spec.file_name(),
                 ))
             }
         }
@@ -126,10 +144,10 @@ fn parse(markdown_input: &str, spec: Spec) -> Result<Trace, Error> {
             let id = extract_identifier(inner.as_ref());
             if let Some(id) = id {
                 if trace.insert(id.to_string(), Default::default()).is_some() {
-                    errors.push(format!("Headings must be unique, but {id} is not"))
+                    errors.push(format!("\"{}\" must contain unique identifiers, but \"{id}\" is not", spec.file_name()))
                 }
             } else {
-                errors.push(format!("Can't parse the identifier of {}", inner.as_ref()))
+                errors.push(format!("\"{}\" must contain sections of the form \"## ID - title\", but \"{inner}\" is not in this form", spec.file_name()))
             }
         }
         Event::End(Tag::Heading(HeadingLevel::H2, _, _)) => {
@@ -173,7 +191,8 @@ fn parse(markdown_input: &str, spec: Spec) -> Result<Trace, Error> {
     });
     if !has_title {
         errors.push(format!(
-            "The document must start with \"# {expected_title}\""
+            "\"{}\" must start with \"# {expected_title}\", but the document has no title",
+            spec.file_name(),
         ))
     }
 

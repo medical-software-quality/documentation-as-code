@@ -17,7 +17,7 @@ a small maintainance and reduced risks of semantic errors.
 The interface of this application is a command line interface. This catters for the primary
 audience of this application, developers.
 
-### Trace
+## Trace
 * FS-1
 * FS-2
 * FS-3

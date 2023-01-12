@@ -159,7 +159,7 @@ fn then_missing_header_in_design(w: &mut World) {
         .failure()
         .stdout(
             predicates::str::contains("ERROR").and(predicates::str::contains(
-                "The document must start with \"# Design specification\" but starts with \"# Design statement\"",
+                "\"design_specification.md\" must start with \"# Design specification\" but starts with \"# Design statement\"",
             )),
         );
 }

@@ -8,13 +8,8 @@ mod specification;
 
 use specification::*;
 
-fn get_document(
-    project: PathBuf,
-    spec: Spec,
-    file_name: &str,
-    errors: &mut Vec<String>,
-) -> Option<Document> {
-    let path = project.join(file_name);
+fn get_document(project: PathBuf, spec: Spec, errors: &mut Vec<String>) -> Option<Document> {
+    let path = project.join(spec.file_name());
 
     let content = match files::read_file(path) {
         Ok(content) => content,
@@ -36,22 +31,9 @@ fn get_documents(project: PathBuf) -> Result<Documents, Error> {
     let mut errors = vec![];
 
     let requirements = get_specification(project.clone(), &mut errors);
-
-    let design = get_document(
-        project.clone(),
-        Spec::Design,
-        "design_specification.md",
-        &mut errors,
-    );
-
-    let risk_assessment = get_document(
-        project.clone(),
-        Spec::Risks,
-        "risk_assessment.md",
-        &mut errors,
-    );
-
-    let verification_plan = get_document(project, Spec::Tests, "verification_plan.md", &mut errors);
+    let design = get_document(project.clone(), Spec::Design, &mut errors);
+    let risk_assessment = get_document(project.clone(), Spec::Risks, &mut errors);
+    let verification_plan = get_document(project, Spec::Tests, &mut errors);
 
     if errors.is_empty() {
         Documents::try_new(
