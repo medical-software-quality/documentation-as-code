@@ -1,9 +1,12 @@
-name: Check and test
+name: Build and release
 
 on:
   release:
     types: [created]
   push:
+    branches:
+      - main
+  pull_request:
 
 env:
   REGISTRY: ghcr.io
@@ -51,7 +54,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
-          push: true
+          push: ${{github.event_name == "release"}}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
@@ -71,6 +74,7 @@ jobs:
             archive: zip
     steps:
       - uses: actions/checkout@v2
+      # this action only publishes on "release"
       - name: Compile and release
         uses: rust-build/rust-build.action@v1.4.0
         env:
