@@ -1,6 +1,9 @@
 name: Check and test
 
-on: [push, pull_request]
+on:
+  release:
+    types: [created]
+  push:
 
 env:
   REGISTRY: ghcr.io
