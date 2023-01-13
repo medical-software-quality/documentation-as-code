@@ -12,3 +12,4 @@ All tests passing is a pre-condition for this application to be released.
 * FS-3
 * FS-4
 * FS-5
+* RISK-1

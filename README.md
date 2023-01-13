@@ -49,23 +49,23 @@ when presenting the process in an inspection, the "process QA" is not presenting
 but rather a shadow of the actual process.
 
 Overall, this makes audits and inspections assess a shadow process, resulting in
-a missed oportunity by all sides (development team, QA team and auditor) to improve
+a missed opportunity by all sides (development team, QA team and auditor) to improve
 overall patient safety, product quality and data integrity.
 
 ### This repository - documentation as code
 
 This repository contains a specification to document software aimed at bridging the gap
-between the QA practiced by the pharmaceutical industry (governed by the corresponding governmantal bodies such as FDA and EMA) and the development practices used in 
-much of the software development industry.
+between the QA practiced by the pharmaceutical industry (governed by the corresponding governmantal bodies such as FDA and EMA) and the state of the art practices used in 
+the software industry.
 
 By adereing to this specification, documentation management becomes part
 of the development process, enabling the process of producing, versioning,
-and publishing documentation to be part of the CI/CD process.
+and publishing documentation to be part of the software development process.
 
-This repository also contains a command line interface (CLI) that can be used in CI/CD to
-incorporate these practices in an automated process.
+Bridging these, this repository contains a command line interface (CLI) that
+can be used in CI/CD to incorporate these practices in the development process.
 This CLI is documented according to the specification outlined in this repository,
-therefore also serving as a example to how to adopt it.
+therefore also serving as a example to how to use the specification.
 
 Note: technologically, documenting software to follow the specification
 in this repository is "trivial". Often the barrier is found the teams'
@@ -104,11 +104,16 @@ associated documentation.
 ## How to use
 
 The process is simple:
-1. Write the software's documentation using the specification described [here](./documentation/README.md) in your git repository
-2. Add a step to your CI that verifies the documentation, using the CLI in this repository
-3. Put guard rails on the documentation process. For example:
-    * code ownership policy on it so that QC is required to review it
+1. Write the software's documentation using the specification described [here](./documentation/README.md) in your code repository
+2. Add a step to your CI to verify the documentation (via the CLI in this repository)
+3. Put guard rails on the development process. For example:
+    * code ownership policy so that QC is required to review changes to it
     * pull request review guidelines requesting developers to ensure that documentation is updated
+    * [semantic versioning](https://semver.org/) in place to control for backward incompatible
+      changes to the specification
+
+Note that these steps are necessary but not sufficient for establishing fitness for intended
+use, but they are pre-condition as they establish the software documentation.
 
 ### CLI in CI/CD
 You can use this CLI in 2 ways:
@@ -135,15 +140,10 @@ To run it against a directory
 cargo run --path /documentation
 ```
 
-To build image:
+To build and run image against this repository
 
 ```bash
 docker build . -t quality
-```
-
-To run image against this repository
-
-```bash
 docker run -v `pwd`/documentation:/documentation --rm quality --path /documentation
 ```
 
