@@ -1,14 +1,15 @@
 # Medical software documentation 
 
 This repository contains a specification to document medical software
-compliant with EMA[1] and FDA[2] requirements in a modern DevOps context
+compliant with EMA[^1] and FDA[^2] requirements in a modern DevOps context
 with git, continuous integration and continuous deployment (CI/CD).
 
 It also contains a CLI application and docker image to check that a documentation fulfills
 this specification.
 
-[1] [Guidance on Qualification and Classification of Software in Regulation (EU) 2017/745 – MDR and Regulation (EU) 2017/746 – IVDR](https://health.ec.europa.eu/system/files/2020-09/md_mdcg_2019_11_guidance_qualification_classification_software_en_0.pdf)
-[2] [General Principles of Software Validation](https://www.fda.gov/regulatory-information/search-fda-guidance-documents/general-principles-software-validation)
+[^1]: [Guidance on Qualification and Classification of Software in Regulation (EU) 2017/745 – MDR and Regulation (EU) 2017/746 – IVDR](https://health.ec.europa.eu/system/files/2020-09/md_mdcg_2019_11_guidance_qualification_classification_software_en_0.pdf)
+
+[^2]: [General Principles of Software Validation](https://www.fda.gov/regulatory-information/search-fda-guidance-documents/general-principles-software-validation)
 
 ## Background
 
