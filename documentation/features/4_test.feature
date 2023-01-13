@@ -8,11 +8,10 @@ Feature: FS-4 - software verification plan
   - how each of the risks (described in FS-3) mitigated by tests is mitigated
   - where is the evidence of the execution of the test stored
 
-  The verification plan is documented in a single markdown file starting with `# Verification specification`,
-  and where each test is itemized by headings (h2).
+  The verification plan is documented in a single markdown file named `verification_plan.md`
+  starting with `# Verification specification` and where each test is itemized by headings (h2).
   Each test may contain a subsection `### Trace` with a single list containing
-  identifiers of existing requirements or risks.
-  See examples below.
+  identifiers of existing requirements or risks, see examples below.
 
   All tests of the software must be described in this verification plan, and
   this verification plan must only assess risks of this software.

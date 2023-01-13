@@ -6,11 +6,10 @@ Feature: FS-2 - solution must contain a design specification
     - How its main components interact with each other
     - How its main components address the functional specification
 
-    The design specification is documented in a single markdown file starting with `# Design specification`,
-    and where each design item is itemized by headings (h2).
+    The design specification is documented in a single markdown file named `design_specification.md`
+    starting with `# Design specification` and where each design item is itemized by headings (h2).
     Each item may contain a subsection `### Trace` with a single list containing
-    identifiers of existing requirements.
-    See examples below.
+    identifiers of existing requirements, see examples below.
 
     The complete design specification of the software must be specified as above, and
     the design specification must only specify the software.

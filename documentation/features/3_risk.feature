@@ -13,9 +13,10 @@ Feature: FS-3 - solution must contain a risk assessment
   risks that have been significantly mitigated may not be part of the assessment.
   Note that risks are always assessed against the software specification.
 
-  The risk assessment is documented in a single markdown file starting with `# Risk assessment`,
-  and where each risk item is itemized by headings (h2).
-  See examples below.
+  The risk assessment is documented in a single markdown file named `risk_asessement.md`
+  starting with `# Risk assessment` and where each risk item is itemized by headings (h2).
+  Each item may contain a subsection `### Trace` with a single list containing
+  identifiers of existing requirements, see examples below.
 
   The complete risk assessment of the software must be specified as above, and
   the risk assessment must only assess risks of this software.
