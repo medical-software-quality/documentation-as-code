@@ -1,11 +1,12 @@
 Feature: FS-1 - software must be specified
   The software must be specified. In particular, every critical requirement,
   functional or not, must be enumerated and described.
+  The set of critical requirements is the software's intended use.
 
-  Each requirement must be written as a [Gherkin `.feature` file](https://cucumber.io/docs/gherkin/reference/)
+  Each critical requirement must be written as a
+  [Gherkin `.feature` file](https://cucumber.io/docs/gherkin/reference/)
   under a directory named `features`.
-
-  The Gherkin feature must start with `FS-`, followed by ` - ` and a title.
+  The Gherkin feature name must start with `FS-`, followed by ` - ` and a title.
 
   The complete specification of the software must be specified as above, and
   the specification must only specify the software.
@@ -26,8 +27,15 @@ Feature: FS-1 - All user actions that add or modify data must be logged to form 
     When the user tries to access the system
     Then it must not be allowed to
       """
+    And the following verification plan
+      """
+        # Verification plan
+        ## TEST-1 - Placeholder
+        ### Trace
+        * FS-1
+      """
     When we check it
-    Then we get no error regarding its specification
+    Then we get no error
 
   Example: invalid Gherkin feature
     Given the following feature

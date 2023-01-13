@@ -1,16 +1,15 @@
-# GAMP-compliant custom software documentation
+# Medical software documentation 
 
 This repository contains a specification to document medical software
-that is compliant with EMEA and FDA
-requirements for medical software in a modern DevOps context
-with continuous integration and continuous deployment (CI/CD).
+compliant with EMEA and FDA requirements in a modern DevOps context
+with git, continuous integration and continuous deployment (CI/CD).
 
-It also contains a Rust library and CLI application that verifies a set of documents
-against the specification.
+It also contains a CLI application and docker image to check that a documentation fulfills
+this specification.
 
 ## Background
 
-Quality assurance (QA) in medical devices is a lengthly,
+Quality assurance (QA) in medical software is a lengthly,
 complex, and meticuolus process comprising a significant number of hand-held activities
 that produce documentation with the aim of establishing intended use, risk mitigation,
 and fit for intended use. These are for example described in the book
@@ -26,14 +25,13 @@ driven development (BDD).
 Almost paradoxically, although these processes seem incompatible in form, their objectives are
 the same: improve quality and reduce risk using a risk-based approach.
 
-### Risk of one organization with two practices
+### One organization with two practices
 
-The primary consequence of these two seemly incompatible cultures is that organizations
+The primary consequence of these two cultures is that organizations
 usually have 2 teams working in QA - "software QA", comprising
 of people with expertise in software testing and DevOps, and "process QA", comprising
 of validation leads and QA leads with expertise in the requirements set out by
-governamental agencies such as FDA. These teams usually produce two
-parallel sets of deliverables:
+governamental agencies. These teams usually produce two parallel sets of deliverables:
 
 * The process executed by "software QA" (hereby named "process")
 * The process interpreted by "process QA" (hereby named "shadow process")
@@ -48,26 +46,25 @@ when presenting the process in an inspection, the "process QA" is not presenting
 but rather a shadow of the actual process.
 
 Overall, this makes audits and inspections assess a shadow process, resulting in
-a missed oportunity in all sides (development team, QA team and auditor) to improve
+a missed oportunity by all sides (development team, QA team and auditor) to improve
 overall patient safety, product quality and data integrity.
 
-### This repository
+### This repository - documentation as code
 
 This repository contains a specification to document software aimed at bridging the gap
 between the QA practiced by the pharmaceutical industry (governed by the corresponding governmantal bodies such as FDA and EMEA) and the development practices used in 
 much of the software development industry.
 
 By adereing to this specification, documentation management becomes part
-of the development process, making the process of producing, versioning,
-and publishing documentation part of the CI/CD process.
+of the development process, enabling the process of producing, versioning,
+and publishing documentation to be part of the CI/CD process.
 
 This repository also contains a command line interface (CLI) that can be used in CI/CD to
 incorporate these practices in an automated process.
-
 This CLI is documented according to the specification outlined in this repository,
 therefore also serving as a example to how to adopt it.
 
-Note that technologically, documenting software to follow the specification
+Note: technologically, documenting software to follow the specification
 in this repository is "trivial". Often the barrier is found the teams'
 organization and knowledge and this repository is therefore aimed at reducing
 this barrier, not solving a difficult technical problem.
@@ -77,12 +74,12 @@ this barrier, not solving a difficult technical problem.
 If you are a software developer, DevOps engineer, or tech lead concerned that your QA is requesting too many word documents, excel sheets, wiki pages or PDFs
 that you know will either:
 * drift from what the software is or
-* have a significant procedural cost and/or quality of life impact to your team.
+* have a significant cost and/or quality of life impact to your team.
 
 This repository helps at formulating a proposal to your QA with a mechanism to document
 the software that is:
-* developer friendly
-* aligned with current DevOps practices
+* developer friendly (git, markdown, Gherkin)
+* aligned with current DevOps practices (documentation lives next to code and is checked in CI/CD)
 * compatible with QA's requirements:
     * good documentation practices (who, when, what, identifiers and document versioning)
     * software documentation required for "custom software"
@@ -90,7 +87,7 @@ the software that is:
 
 By adopting this specification, you are inviting your QA or validation lead to become
 part of the DevOps process whereby documentation, just like working tests, is a 
-requirement for the software to be "releasable".
+requirement for releasable software.
 
 ### For validation leads
 
@@ -103,10 +100,18 @@ associated documentation.
 
 ## How to use
 
-You can use this repository in 2 ways:
+The process is simple:
+1. Write the software's documentation using the specification described [here](./documentation/README.md) in your git repository
+2. Add a step to your CI that verifies the documentation, using the CLI in this repository
+3. Put guard rails on the documentation process. For example:
+    * code ownership policy on it so that QC is required to review it
+    * pull request review guidelines requesting developers to ensure that documentation is updated
 
-* via the docker image published on github
-* via the CLI installed via Rust's Cargo tool
+### CLI in CI/CD
+You can use this CLI in 2 ways:
+
+* via the docker image published on github (ghcr.io/jorgecarleitao/quality:latest)
+* via the binaries published on github, under "releases"
 
 The CLI is specified [here](./documentation/README.md) according
 to this repositories' specification.
@@ -119,6 +124,12 @@ To run tests:
 
 ```bash
 cargo test
+```
+
+To run it against a directory
+
+```bash
+cargo run --path /documentation
 ```
 
 To build image:
@@ -135,8 +146,7 @@ docker run -v `pwd`/documentation:/documentation --rm quality --path /documentat
 
 ## Versioning
 
-This repository uses semantic versioning and has two versions. A version of the specification,
-and a version of the CLI.
+This repository uses semantic versioning.
 
 ## License
 

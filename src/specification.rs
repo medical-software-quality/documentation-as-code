@@ -266,6 +266,7 @@ fn check_documentation(
     let designs = &design_specification.trace;
     let requirements = &requirements;
 
+    let mut uncovered_requirements = requirements.keys().collect::<IndexSet<_>>();
     for (test, values) in tests {
         for value in values {
             let is_valid = risks.contains_key(value) || requirements.contains_key(value);
@@ -277,7 +278,13 @@ fn check_documentation(
                     errors.push(format!("Tests can only be traced to existing risks or requirements, but {test} is traced to something else"));
                 }
             }
+            uncovered_requirements.remove(value);
         }
+    }
+    if !uncovered_requirements.is_empty() {
+        errors.push(format!(
+            "All requirements must be covered by tests, but {uncovered_requirements:?} are not"
+        ));
     }
 
     for (risk, values) in risks {

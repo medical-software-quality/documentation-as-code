@@ -12,7 +12,7 @@ Something
             """# Risk assessment
 ## RISK-1 - example
             """
-        And the following content in `verification_plan.md`
+        And the following verification plan
             """# Verification plan
 ## TEST-1 - example
 ### Trace

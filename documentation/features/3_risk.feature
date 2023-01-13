@@ -13,7 +13,8 @@ Feature: FS-3 - solution must contain a risk assessment
   risks that have been significantly mitigated may not be part of the assessment.
   Note that risks are always assessed against the software specification.
 
-  The risk assessment is documented in a single markdown file, itemized by headings (h2).
+  The risk assessment is documented in a single markdown file starting with `# Risk assessment`,
+  and where each risk item is itemized by headings (h2).
   See examples below.
 
   The complete risk assessment of the software must be specified as above, and
@@ -66,6 +67,13 @@ Feature: FS-1 - something
   Scenario: Something
     When something
     Then something else
+      """
+    And the following verification plan
+      """
+        # Verification plan
+        ## TEST-1 - Placeholder
+        ### Trace
+        * FS-1
       """
     When we check its documentation
     Then we get no error

@@ -1,20 +1,25 @@
 Feature: FS-4 - software verification plan
   The software's verification plan must be described.
 
-  The verification plan is used to establish fitness for intended use.
+  The verification plan describes how fitness for intended use is established.
 
   The verification plan must describe
   - how every requirement (described in FS-1) is tested
   - how each of the risks (described in FS-3) mitigated by tests is mitigated
   - where is the evidence of the execution of the test stored
 
-  The test plan is documented in a single markdown file, itemized by headings (h2)
-  with an optional introduction.
-
+  The verification plan is documented in a single markdown file starting with `# Verification specification`,
+  and where each test is itemized by headings (h2).
+  Each test may contain a subsection `### Trace` with a single list containing
+  identifiers of existing requirements or risks.
   See examples below.
 
+  All tests of the software must be described in this verification plan, and
+  this verification plan must only assess risks of this software.
+  All requirements must be covered by tests.
+
   Example: a valid verification plan
-    Given the following content in `verification_plan.md`
+    Given the following verification plan
       """
       # Verification plan
       ## TEST-1 - Unit tests
@@ -68,7 +73,7 @@ Feature: FS-1 - something
     Then we get an error of a missing verification plan
 
   Example: headings of the verification plan must be of the form `# TEST-X - title`
-    Given the following content in `verification_plan.md`
+    Given the following verification plan
       """
       # Verification plan
       ## Test 1 - this
@@ -77,7 +82,7 @@ Feature: FS-1 - something
     Then we get an error of an incorrect verification plan
 
   Example: verification plan with a trace to existing features
-    Given the following content in `verification_plan.md`
+    Given the following verification plan
       """
     # Verification plan
     ## TEST-1 - Example
@@ -95,7 +100,7 @@ Feature: FS-1 - something
     Then we get no error
 
   Example: verification plan with a trace to a non-existing feature
-    Given the following content in `verification_plan.md`
+    Given the following verification plan
       """
     # Verification plan
     ## TEST-1 - Example

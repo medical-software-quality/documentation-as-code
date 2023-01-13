@@ -70,7 +70,7 @@ fn a_risk(w: &mut World, step: &Step) {
     w.has_spec = true;
 }
 
-#[given(expr = "the following content in `verification_plan.md`")]
+#[given(expr = "the following verification plan")]
 fn a_test(w: &mut World, step: &Step) {
     w.verification_plan = step.docstring.as_ref().unwrap().clone();
     w.has_spec = true;
@@ -255,7 +255,6 @@ fn check_fails_gherkin(w: &mut World) {
 }
 
 #[then("we get no error")]
-#[then("we get no error regarding its specification")]
 fn check_ok(w: &mut World) {
     let command = std::mem::take(&mut w.command);
     command.unwrap().assert().success();
