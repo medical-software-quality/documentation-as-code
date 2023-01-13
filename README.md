@@ -1,7 +1,7 @@
 # Medical software documentation 
 
 This repository contains a specification to document medical software
-compliant with EMA[^1] and FDA[^2] requirements in a modern DevOps context
+compliant with EMA[^1][^2] and FDA[^3][^4] requirements in a modern DevOps context
 with git, continuous integration and continuous deployment (CI/CD).
 
 It also contains a CLI application and docker image to check that a documentation fulfills
@@ -9,11 +9,15 @@ this specification.
 
 [^1]: [Guidance on Qualification and Classification of Software in Regulation (EU) 2017/745 – MDR and Regulation (EU) 2017/746 – IVDR](https://health.ec.europa.eu/system/files/2020-09/md_mdcg_2019_11_guidance_qualification_classification_software_en_0.pdf)
 
-[^2]: [General Principles of Software Validation](https://www.fda.gov/regulatory-information/search-fda-guidance-documents/general-principles-software-validation)
+[^2]: [Draft Guideline on computerised systems and electronic data in clinical trials](https://www.ema.europa.eu/en/documents/regulatory-procedural-guideline/draft-guideline-computerised-systems-electronic-data-clinical-trials_en.pdf)
+
+[^3]: [General Principles of Software Validation](https://www.fda.gov/regulatory-information/search-fda-guidance-documents/general-principles-software-validation)
+
+[^4]: [Draft Computer Software Assurance for Production and Quality System Software](https://www.fda.gov/regulatory-information/search-fda-guidance-documents/computer-software-assurance-production-and-quality-system-software)
 
 ## Background
 
-Quality assurance (QA) in medical software is meticuolus process comprising
+Quality assurance (QA) in medical software is a meticulous process comprising
 a significant number of hand-held activities
 that produce documentation with the aim at establishing intended use, risk mitigation,
 and fitness for intended use.
