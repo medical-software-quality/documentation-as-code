@@ -1,7 +1,5 @@
 Feature: FS-4 - software verification plan
-  The software's verification plan must be described.
-
-  The verification plan describes how fitness for intended use is established.
+  The plan to establish the software's intended use must exist in the form of a verification plan.
 
   The verification plan must describe
   - how every requirement (described in FS-1) is tested

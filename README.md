@@ -123,8 +123,8 @@ use, but they are pre-condition as they establish the software documentation.
 ### CLI in CI/CD
 You can use this CLI in 2 ways:
 
-* via the docker image published on github (ghcr.io/jorgecarleitao/quality:latest)
-* via the binaries published on github, under "releases"
+* via the docker image published on github (https://github.com/jorgecarleitao/quality/pkgs/container/quality).
+* via the binaries [published as assets on github](https://github.com/jorgecarleitao/quality/releases)
 
 The CLI is specified [here](./documentation/README.md) according
 to this repositories' specification.
