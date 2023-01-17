@@ -6,6 +6,7 @@ on:
   push:
     branches:
       - main
+      - actions
   pull_request:
 
 env:
@@ -17,16 +18,17 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install Rust
         run: rustup update stable
-      - uses: Swatinem/rust-cache@v1
+      - uses: Swatinem/rust-cache@v2
       - name: Run TEST-1
         run: cargo test
       - name: Test own documentation
         run: cargo run -- --path documentation/
 
   build-and-publish-image:
+    name: Publish docker image
     runs-on: ubuntu-latest
     needs: test
     permissions:
@@ -62,8 +64,9 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
 
   build-and-publish-binaries:
-    name: Build and publish ${{ matrix.target }}
+    name: Publish binary (${{ matrix.target }})
     needs: test
+    if: github.event_name == 'release'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -76,8 +79,7 @@ jobs:
           - target: x86_64-apple-darwin
             archive: zip
     steps:
-      - uses: actions/checkout@v2
-      # this action only publishes on "release"
+      - uses: actions/checkout@v3
       - name: Compile and release
         uses: rust-build/rust-build.action@v1.4.0
         env:
@@ -85,3 +87,16 @@ jobs:
         with:
           RUSTTARGET: ${{ matrix.target }}
           ARCHIVE_TYPES: ${{ matrix.archive }}
+
+  test-action:
+    name: Test action with published binaries
+    needs: build-and-publish-binaries
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Check documentation
+        uses: jorgecarleitao/quality/.github/actions@v0.0.6
+        with:
+          path: './documentation'
+          github_token: ${{ secrets.GITHUB_TOKEN }}

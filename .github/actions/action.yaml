@@ -1,0 +1,24 @@
+name: "Test"
+description: "description"
+inputs:
+  path:
+    description: "The path to the documentation"
+    required: true
+  github_token:
+    description: "The GITHUB_TOKEN used to retrieve the pipeline"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Check documentation
+      run: |
+        set -eo pipefail
+        REPOSITORY=jorgecarleitao/quality
+        ASSET_URL=$(curl -H 'Authorization: Bearer ${{ inputs.github_token }}' https://api.github.com/repos/$REPOSITORY/releases/tags/$VERSION | jq '.assets | .[] | select(.name | endswith("unknown-linux-musl.tar.xz")) | .url' -r)
+        curl -sL -H 'Accept: application/octet-stream' -H 'Authorization: Bearer ${{ inputs.github_token }}' $ASSET_URL > unknown-linux-musl.tar.gz
+        tar -xf unknown-linux-musl.tar.gz
+        rm -rf unknown-linux-musl.tar.gz
+        ./quality --path ${{ inputs.path }}
+      shell: bash
+      env:
+        VERSION: ${{ github.action_ref }}
