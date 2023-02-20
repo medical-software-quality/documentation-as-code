@@ -8,6 +8,10 @@ Feature: FS-5 - output to JSON
 ## DS-1 - Architecture
 Something
             """
+        And the following content in `user_manual.md`
+            """# User manual
+## USER-1 - developer
+            """
         And the following content in `risk_assessment.md`
             """# Risk assessment
 ## RISK-1 - example
@@ -57,6 +61,12 @@ Something
                         "TEST-1": [
                             "FS-1"
                         ]
+                    }
+                },
+                "user_manual": {
+                    "text": "# User manual\n## USER-1 - developer\n",
+                    "trace": {
+                        "USER-1": []
                     }
                 }
             }

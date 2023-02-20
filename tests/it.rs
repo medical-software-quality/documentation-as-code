@@ -3,7 +3,13 @@ use cucumber::{given, then, when, World as _};
 use gherkin::Step;
 use predicates::prelude::PredicateBooleanExt;
 
-fn create_local_project(spec: &str, design: &str, risk: &str, test: &str) -> std::path::PathBuf {
+fn create_local_project(
+    spec: &str,
+    design: &str,
+    risk: &str,
+    test: &str,
+    manual: &str,
+) -> std::path::PathBuf {
     let dir = std::env::temp_dir();
     let dir = dir.join("project");
     let _ = std::fs::remove_dir_all(&dir);
@@ -21,6 +27,11 @@ fn create_local_project(spec: &str, design: &str, risk: &str, test: &str) -> std
             "# Design specification",
         )
         .unwrap();
+    }
+    if !manual.is_empty() {
+        std::fs::write(dir.join("user_manual.md"), manual).unwrap();
+    } else {
+        std::fs::write(dir.join("user_manual.md"), "# User manual").unwrap();
     }
     if !risk.is_empty() {
         std::fs::write(dir.join("risk_assessment.md"), risk).unwrap();
@@ -41,6 +52,7 @@ struct World {
     risk_assessment: String,
     verification_plan: String,
     design_specification: String,
+    user_manual: String,
     has_spec: bool,
     command: Option<Command>,
 }
@@ -76,6 +88,13 @@ fn a_test(w: &mut World, step: &Step) {
     w.has_spec = true;
 }
 
+#[given(expr = "the following content in `user_manual.md`")]
+#[given(expr = "the following valid user manual")]
+fn a_manual(w: &mut World, step: &Step) {
+    w.user_manual = step.docstring.as_ref().unwrap().clone();
+    w.has_spec = true;
+}
+
 #[when(expr = "we check its documentation")]
 #[when(expr = "we check it")]
 fn check_docs(w: &mut World) {
@@ -85,6 +104,7 @@ fn check_docs(w: &mut World) {
             &w.design_specification,
             &w.risk_assessment,
             &w.verification_plan,
+            &w.user_manual,
         )
     } else {
         "./not_a_directory".into()
@@ -119,6 +139,14 @@ fn missing_verification(w: &mut World) {
     let command = std::mem::take(&mut w.command);
     command.unwrap().assert().failure().stdout(
         predicates::str::contains("ERROR").and(predicates::str::contains("verification_plan.md")),
+    );
+}
+
+#[then("we get an error of a missing user manual file")]
+fn missing_manual(w: &mut World) {
+    let command = std::mem::take(&mut w.command);
+    command.unwrap().assert().failure().stdout(
+        predicates::str::contains("ERROR").and(predicates::str::contains("user_manual.md")),
     );
 }
 

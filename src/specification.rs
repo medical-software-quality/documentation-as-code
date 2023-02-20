@@ -17,6 +17,7 @@ pub enum Spec {
     Design,
     Risks,
     Tests,
+    Manual,
 }
 
 impl Spec {
@@ -26,6 +27,7 @@ impl Spec {
             Spec::Design => "design_specification.md",
             Spec::Risks => "risk_assessment.md",
             Spec::Tests => "verification_plan.md",
+            Spec::Manual => "user_manual.md",
         }
     }
 }
@@ -51,6 +53,7 @@ pub struct Documents {
     design_specification: Document,
     risk_assessment: Document,
     verification_plan: Document,
+    user_manual: Document,
 }
 
 impl Documents {
@@ -59,18 +62,21 @@ impl Documents {
         design_specification: Document,
         risk_assessment: Document,
         verification_plan: Document,
+        user_manual: Document,
     ) -> Result<Self, Error> {
         check_documentation(
             &requirements,
             &verification_plan,
             &risk_assessment,
             &design_specification,
+            &user_manual,
         )?;
         Ok(Self {
             requirements,
             design_specification,
             risk_assessment,
             verification_plan,
+            user_manual,
         })
     }
 }
@@ -98,6 +104,7 @@ fn parse(markdown_input: &str, spec: Spec) -> (Trace, Vec<String>) {
         Spec::Design => "Design specification",
         Spec::Tests => "Verification plan",
         Spec::Risks => "Risk assessment",
+        Spec::Manual => "User manual",
         Spec::Requirements => unreachable!(),
     };
 
@@ -219,6 +226,12 @@ fn check_ids<'a, I: Iterator<Item = &'a String>>(headings: I, spec: Spec) -> Vec
                 format!("Headings in verification plan must start with \"TEST-\". \"{heading}\" does not.")
             })
             .collect(),
+        Spec::Manual => headings
+            .filter(|heading| !heading.starts_with("USER-"))
+            .map(|heading| {
+                format!("Headings in requirements must start with \"USER-\". \"{heading}\" does not.")
+            })
+            .collect(),
     };
 
     errors
@@ -258,6 +271,7 @@ fn check_documentation(
     verification_plan: &Document,
     risk_assessment: &Document,
     design_specification: &Document,
+    user_manual: &Document,
 ) -> Result<(), Error> {
     let mut errors = vec![];
 
@@ -265,6 +279,7 @@ fn check_documentation(
     let risks = &risk_assessment.trace;
     let designs = &design_specification.trace;
     let requirements = &requirements;
+    let user_manual = &user_manual.trace;
 
     let mut uncovered_requirements = requirements.keys().collect::<IndexSet<_>>();
     for (test, values) in tests {
@@ -312,6 +327,22 @@ fn check_documentation(
                     errors.push(format!("Designs can only be traced to existing requirements, but {design} is traced to a risk, test or another design"));
                 } else {
                     errors.push(format!("Designs can only be traced to existing requirements, but {design} is traced to something else"));
+                }
+            }
+        }
+    }
+
+    for (user, values) in user_manual {
+        for value in values {
+            let is_valid = requirements.contains_key(value);
+            if !is_valid {
+                let in_other = risks.contains_key(value)
+                    || tests.contains_key(value)
+                    || designs.contains_key(value);
+                if in_other {
+                    errors.push(format!("Users can only be traced to existing requirements, but {user} is traced to a risk, test or another design"));
+                } else {
+                    errors.push(format!("Designs can only be traced to existing requirements, but {user} is traced to something else"));
                 }
             }
         }

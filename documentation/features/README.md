@@ -5,3 +5,4 @@
 * [risk assessment document](./features/3_risk.feature)
 * [verification plan document](./features/4_test.feature)
 * [computer-readable output](./features/5_json.feature)
+* [user manual](./features/6_user_manual.feature)
