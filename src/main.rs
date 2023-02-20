@@ -34,7 +34,8 @@ fn get_documents(project: PathBuf) -> Result<Documents, Error> {
     let design = get_document(project.clone(), Spec::Design, &mut errors);
     let risk_assessment = get_document(project.clone(), Spec::Risks, &mut errors);
     let verification_plan = get_document(project.clone(), Spec::Tests, &mut errors);
-    let user_manual = get_document(project, Spec::Manual, &mut errors);
+    let user_manual = get_document(project.clone(), Spec::Manual, &mut errors);
+    let retirement_plan = get_document(project, Spec::Retire, &mut errors);
 
     if errors.is_empty() {
         Documents::try_new(
@@ -43,6 +44,7 @@ fn get_documents(project: PathBuf) -> Result<Documents, Error> {
             risk_assessment.unwrap(),
             verification_plan.unwrap(),
             user_manual.unwrap(),
+            retirement_plan.unwrap(),
         )
     } else {
         Err(Error(errors))

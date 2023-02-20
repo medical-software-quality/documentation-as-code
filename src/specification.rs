@@ -18,6 +18,7 @@ pub enum Spec {
     Risks,
     Tests,
     Manual,
+    Retire,
 }
 
 impl Spec {
@@ -28,6 +29,7 @@ impl Spec {
             Spec::Risks => "risk_assessment.md",
             Spec::Tests => "verification_plan.md",
             Spec::Manual => "user_manual.md",
+            Spec::Retire => "retirement_plan.md",
         }
     }
 }
@@ -54,6 +56,7 @@ pub struct Documents {
     risk_assessment: Document,
     verification_plan: Document,
     user_manual: Document,
+    retirement_plan: Document,
 }
 
 impl Documents {
@@ -63,6 +66,7 @@ impl Documents {
         risk_assessment: Document,
         verification_plan: Document,
         user_manual: Document,
+        retirement_plan: Document,
     ) -> Result<Self, Error> {
         check_documentation(
             &requirements,
@@ -70,6 +74,7 @@ impl Documents {
             &risk_assessment,
             &design_specification,
             &user_manual,
+            &retirement_plan,
         )?;
         Ok(Self {
             requirements,
@@ -77,6 +82,7 @@ impl Documents {
             risk_assessment,
             verification_plan,
             user_manual,
+            retirement_plan,
         })
     }
 }
@@ -105,6 +111,7 @@ fn parse(markdown_input: &str, spec: Spec) -> (Trace, Vec<String>) {
         Spec::Tests => "Verification plan",
         Spec::Risks => "Risk assessment",
         Spec::Manual => "User manual",
+        Spec::Retire => "Retirement plan",
         Spec::Requirements => unreachable!(),
     };
 
@@ -200,7 +207,7 @@ fn parse(markdown_input: &str, spec: Spec) -> (Trace, Vec<String>) {
     (trace, errors)
 }
 
-fn check_ids<'a, I: Iterator<Item = &'a String>>(headings: I, spec: Spec) -> Vec<String> {
+fn check_ids<'a, I: Iterator<Item = &'a String> + Clone>(headings: I, spec: Spec) -> Vec<String> {
     let errors: Vec<String> = match spec {
         Spec::Requirements => headings
             .filter(|heading| !heading.starts_with("FS-"))
@@ -229,7 +236,13 @@ fn check_ids<'a, I: Iterator<Item = &'a String>>(headings: I, spec: Spec) -> Vec
         Spec::Manual => headings
             .filter(|heading| !heading.starts_with("USER-"))
             .map(|heading| {
-                format!("Headings in requirements must start with \"USER-\". \"{heading}\" does not.")
+                format!("Headings in user manual must start with \"USER-\". \"{heading}\" does not.")
+            })
+            .collect(),
+        Spec::Retire => headings
+            .filter(|heading| !heading.starts_with("RETIRE-"))
+            .map(|heading| {
+                format!("Headings in retirement plan must start with \"RETIRE-\". \"{heading}\" does not.")
             })
             .collect(),
     };
@@ -272,6 +285,7 @@ fn check_documentation(
     risk_assessment: &Document,
     design_specification: &Document,
     user_manual: &Document,
+    retirement_plan: &Document,
 ) -> Result<(), Error> {
     let mut errors = vec![];
 
@@ -280,6 +294,7 @@ fn check_documentation(
     let designs = &design_specification.trace;
     let requirements = &requirements;
     let user_manual = &user_manual.trace;
+    let retirement_plan = &retirement_plan.trace;
 
     let mut uncovered_requirements = requirements.keys().collect::<IndexSet<_>>();
     for (test, values) in tests {
@@ -342,9 +357,17 @@ fn check_documentation(
                 if in_other {
                     errors.push(format!("Users can only be traced to existing requirements, but {user} is traced to a risk, test or another design"));
                 } else {
-                    errors.push(format!("Designs can only be traced to existing requirements, but {user} is traced to something else"));
+                    errors.push(format!("Users can only be traced to existing requirements, but {user} is traced to something else"));
                 }
             }
+        }
+    }
+
+    for (retire, values) in retirement_plan {
+        if !values.is_empty() {
+            errors.push(format!(
+                "Retirement plan cannot be traced, but {retire} is traced to something else"
+            ));
         }
     }
 

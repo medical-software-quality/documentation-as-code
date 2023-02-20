@@ -7,7 +7,7 @@ Feature: FS-4 - software verification plan
   - where is the evidence of the execution of the test stored
 
   The verification plan is documented in a single markdown file named `verification_plan.md`
-  starting with `# Verification specification` and where each test is itemized by headings (h2).
+  starting with `# Verification plan` and where each test is itemized by headings (h2).
   Each test may contain a subsection `### Trace` with a single list containing
   identifiers of existing requirements or risks, see examples below.
 
@@ -16,7 +16,7 @@ Feature: FS-4 - software verification plan
   All requirements must be covered by tests.
 
   Example: a valid verification plan
-    Given the following verification plan
+    Given the following content in `verification_plan.md`
       """
       # Verification plan
       ## TEST-1 - Unit tests
@@ -70,7 +70,7 @@ Feature: FS-1 - something
     Then we get an error of a missing verification plan
 
   Example: headings of the verification plan must be of the form `# TEST-X - title`
-    Given the following verification plan
+    Given the following content in `verification_plan.md`
       """
       # Verification plan
       ## Test 1 - this
@@ -79,7 +79,7 @@ Feature: FS-1 - something
     Then we get an error of an incorrect verification plan
 
   Example: verification plan with a trace to existing features
-    Given the following verification plan
+    Given the following content in `verification_plan.md`
       """
     # Verification plan
     ## TEST-1 - Example
@@ -97,7 +97,7 @@ Feature: FS-1 - something
     Then we get no error
 
   Example: verification plan with a trace to a non-existing feature
-    Given the following verification plan
+    Given the following content in `verification_plan.md`
       """
     # Verification plan
     ## TEST-1 - Example

@@ -9,6 +9,7 @@ fn create_local_project(
     risk: &str,
     test: &str,
     manual: &str,
+    retirement_plan: &str,
 ) -> std::path::PathBuf {
     let dir = std::env::temp_dir();
     let dir = dir.join("project");
@@ -33,6 +34,11 @@ fn create_local_project(
     } else {
         std::fs::write(dir.join("user_manual.md"), "# User manual").unwrap();
     }
+    if !retirement_plan.is_empty() {
+        std::fs::write(dir.join("retirement_plan.md"), retirement_plan).unwrap();
+    } else {
+        std::fs::write(dir.join("retirement_plan.md"), "# Retirement plan").unwrap();
+    }
     if !risk.is_empty() {
         std::fs::write(dir.join("risk_assessment.md"), risk).unwrap();
     } else {
@@ -53,6 +59,7 @@ struct World {
     verification_plan: String,
     design_specification: String,
     user_manual: String,
+    retirement_plan: String,
     has_spec: bool,
     command: Option<Command>,
 }
@@ -82,7 +89,7 @@ fn a_risk(w: &mut World, step: &Step) {
     w.has_spec = true;
 }
 
-#[given(expr = "the following verification plan")]
+#[given(expr = "the following content in `verification_plan.md`")]
 fn a_test(w: &mut World, step: &Step) {
     w.verification_plan = step.docstring.as_ref().unwrap().clone();
     w.has_spec = true;
@@ -92,6 +99,13 @@ fn a_test(w: &mut World, step: &Step) {
 #[given(expr = "the following valid user manual")]
 fn a_manual(w: &mut World, step: &Step) {
     w.user_manual = step.docstring.as_ref().unwrap().clone();
+    w.has_spec = true;
+}
+
+#[given(expr = "the following retirement plan")]
+#[given(expr = "the following valid retirement plan")]
+fn a_retirement(w: &mut World, step: &Step) {
+    w.retirement_plan = step.docstring.as_ref().unwrap().clone();
     w.has_spec = true;
 }
 
@@ -105,6 +119,7 @@ fn check_docs(w: &mut World) {
             &w.risk_assessment,
             &w.verification_plan,
             &w.user_manual,
+            &w.retirement_plan,
         )
     } else {
         "./not_a_directory".into()
@@ -131,6 +146,14 @@ fn missing_design(w: &mut World) {
     command.unwrap().assert().failure().stdout(
         predicates::str::contains("ERROR")
             .and(predicates::str::contains("design_specification.md")),
+    );
+}
+
+#[then("we get an error of a missing retirement plan")]
+fn missing_retirement(w: &mut World) {
+    let command = std::mem::take(&mut w.command);
+    command.unwrap().assert().failure().stdout(
+        predicates::str::contains("ERROR").and(predicates::str::contains("retirement_plan.md")),
     );
 }
 
@@ -206,6 +229,34 @@ fn check_fails_identifier_verification(w: &mut World) {
         );
 }
 
+#[then("we get an error of an incorrect user manual")]
+fn check_fails_identifier_user_manual(w: &mut World) {
+    let command = std::mem::take(&mut w.command);
+    command
+        .unwrap()
+        .assert()
+        .failure()
+        .stdout(
+            predicates::str::contains("ERROR").and(predicates::str::contains(
+                "Headings in user manual must start with \"USER-\".",
+            )),
+        );
+}
+
+#[then("we get an error of an incorrect retirement plan")]
+fn check_fails_identifier_retirement_plan(w: &mut World) {
+    let command = std::mem::take(&mut w.command);
+    command
+        .unwrap()
+        .assert()
+        .failure()
+        .stdout(
+            predicates::str::contains("ERROR").and(predicates::str::contains(
+                "Headings in retirement plan must start with \"RETIRE-\".",
+            )),
+        );
+}
+
 #[then("we get an error of a missing specification")]
 fn check_fails_specification(w: &mut World) {
     let command = std::mem::take(&mut w.command);
@@ -268,6 +319,20 @@ fn check_fails_identifier_trace_verification(w: &mut World) {
         .stdout(
             predicates::str::contains("ERROR").and(predicates::str::contains(
                 "Tests can only be traced to existing risks or requirements, but TEST-1 is traced to something else",
+            )),
+        );
+}
+
+#[then("we get an error regarding a wrong trace in user manual")]
+fn check_fails_identifier_trace_manual(w: &mut World) {
+    let command = std::mem::take(&mut w.command);
+    command
+        .unwrap()
+        .assert()
+        .failure()
+        .stdout(
+            predicates::str::contains("ERROR").and(predicates::str::contains(
+                "Users can only be traced to existing requirements, but USER-1 is traced to something else",
             )),
         );
 }

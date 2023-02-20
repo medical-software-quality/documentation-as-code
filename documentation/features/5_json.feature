@@ -16,6 +16,10 @@ Something
             """# Risk assessment
 ## RISK-1 - example
             """
+        And the following retirement plan
+            """# Retirement plan
+## RETIRE-1 - API
+            """
         And the following verification plan
             """# Verification plan
 ## TEST-1 - example
@@ -67,6 +71,12 @@ Something
                     "text": "# User manual\n## USER-1 - developer\n",
                     "trace": {
                         "USER-1": []
+                    }
+                },
+                "retirement_plan": {
+                    "text": "# Retirement plan\n## RETIRE-1 - API\n",
+                    "trace": {
+                        "RETIRE-1": []
                     }
                 }
             }
