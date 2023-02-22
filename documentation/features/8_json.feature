@@ -12,15 +12,19 @@ Something
             """# User manual
 ## USER-1 - developer
             """
+        And the following content in `operator_manual.md`
+            """# Operator manual
+## OPERATOR-1 - Tier 3
+            """
         And the following content in `risk_assessment.md`
             """# Risk assessment
 ## RISK-1 - example
             """
-        And the following retirement plan
+        And the following content in `retirement_plan.md`
             """# Retirement plan
 ## RETIRE-1 - API
             """
-        And the following verification plan
+        And the following content in `verification_plan.md`
             """# Verification plan
 ## TEST-1 - example
 ### Trace
@@ -67,16 +71,22 @@ Something
                         ]
                     }
                 },
+                "retirement_plan": {
+                    "text": "# Retirement plan\n## RETIRE-1 - API\n",
+                    "trace": {
+                        "RETIRE-1": []
+                    }
+                },
                 "user_manual": {
                     "text": "# User manual\n## USER-1 - developer\n",
                     "trace": {
                         "USER-1": []
                     }
                 },
-                "retirement_plan": {
-                    "text": "# Retirement plan\n## RETIRE-1 - API\n",
+                "operator_manual": {
+                    "text": "# Operator manual\n## OPERATOR-1 - Tier 3\n",
                     "trace": {
-                        "RETIRE-1": []
+                        "OPERATOR-1": []
                     }
                 }
             }

@@ -8,7 +8,8 @@ fn create_local_project(
     design: &str,
     risk: &str,
     test: &str,
-    manual: &str,
+    user_manual: &str,
+    operator_manual: &str,
     retirement_plan: &str,
 ) -> std::path::PathBuf {
     let dir = std::env::temp_dir();
@@ -29,10 +30,15 @@ fn create_local_project(
         )
         .unwrap();
     }
-    if !manual.is_empty() {
-        std::fs::write(dir.join("user_manual.md"), manual).unwrap();
+    if !user_manual.is_empty() {
+        std::fs::write(dir.join("user_manual.md"), user_manual).unwrap();
     } else {
         std::fs::write(dir.join("user_manual.md"), "# User manual").unwrap();
+    }
+    if !operator_manual.is_empty() {
+        std::fs::write(dir.join("operator_manual.md"), operator_manual).unwrap();
+    } else {
+        std::fs::write(dir.join("operator_manual.md"), "# Operator manual").unwrap();
     }
     if !retirement_plan.is_empty() {
         std::fs::write(dir.join("retirement_plan.md"), retirement_plan).unwrap();
@@ -59,6 +65,7 @@ struct World {
     verification_plan: String,
     design_specification: String,
     user_manual: String,
+    operator_manual: String,
     retirement_plan: String,
     has_spec: bool,
     command: Option<Command>,
@@ -83,7 +90,6 @@ fn a_design(w: &mut World, step: &Step) {
 }
 
 #[given(expr = "the following content in `risk_assessment.md`")]
-#[given(expr = "the following valid risk assessment")]
 fn a_risk(w: &mut World, step: &Step) {
     w.risk_assessment = step.docstring.as_ref().unwrap().clone();
     w.has_spec = true;
@@ -96,14 +102,18 @@ fn a_test(w: &mut World, step: &Step) {
 }
 
 #[given(expr = "the following content in `user_manual.md`")]
-#[given(expr = "the following valid user manual")]
-fn a_manual(w: &mut World, step: &Step) {
+fn a_user_manual(w: &mut World, step: &Step) {
     w.user_manual = step.docstring.as_ref().unwrap().clone();
     w.has_spec = true;
 }
 
-#[given(expr = "the following retirement plan")]
-#[given(expr = "the following valid retirement plan")]
+#[given(expr = "the following content in `operator_manual.md`")]
+fn a_operator_manual(w: &mut World, step: &Step) {
+    w.operator_manual = step.docstring.as_ref().unwrap().clone();
+    w.has_spec = true;
+}
+
+#[given(expr = "the following content in `retirement_plan.md`")]
 fn a_retirement(w: &mut World, step: &Step) {
     w.retirement_plan = step.docstring.as_ref().unwrap().clone();
     w.has_spec = true;
@@ -119,6 +129,7 @@ fn check_docs(w: &mut World) {
             &w.risk_assessment,
             &w.verification_plan,
             &w.user_manual,
+            &w.operator_manual,
             &w.retirement_plan,
         )
     } else {
@@ -166,10 +177,18 @@ fn missing_verification(w: &mut World) {
 }
 
 #[then("we get an error of a missing user manual file")]
-fn missing_manual(w: &mut World) {
+fn missing_user_manual(w: &mut World) {
     let command = std::mem::take(&mut w.command);
     command.unwrap().assert().failure().stdout(
         predicates::str::contains("ERROR").and(predicates::str::contains("user_manual.md")),
+    );
+}
+
+#[then("we get an error of a missing operator manual file")]
+fn missing_operator_manual(w: &mut World) {
+    let command = std::mem::take(&mut w.command);
+    command.unwrap().assert().failure().stdout(
+        predicates::str::contains("ERROR").and(predicates::str::contains("operator_manual.md")),
     );
 }
 
@@ -239,6 +258,20 @@ fn check_fails_identifier_user_manual(w: &mut World) {
         .stdout(
             predicates::str::contains("ERROR").and(predicates::str::contains(
                 "Headings in user manual must start with \"USER-\".",
+            )),
+        );
+}
+
+#[then("we get an error of an incorrect operator manual")]
+fn check_fails_identifier_operator_manual(w: &mut World) {
+    let command = std::mem::take(&mut w.command);
+    command
+        .unwrap()
+        .assert()
+        .failure()
+        .stdout(
+            predicates::str::contains("ERROR").and(predicates::str::contains(
+                "Headings in operator manual must start with \"OPERATOR-\".",
             )),
         );
 }

@@ -27,12 +27,12 @@ Feature: FS-1 - All user actions that add or modify data must be logged to form 
     When the user tries to access the system
     Then it must not be allowed to
       """
-    And the following verification plan
+    And the following content in `verification_plan.md`
       """
-        # Verification plan
-        ## TEST-1 - Placeholder
-        ### Trace
-        * FS-1
+    # Verification plan
+    ## TEST-1 - Placeholder
+    ### Trace
+    * FS-1
       """
     When we check it
     Then we get no error

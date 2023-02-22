@@ -11,8 +11,9 @@ Feature: FS-7 - retirement plan
     starting with `# Retirement plan` and where each item is itemized by headings (h2).
 
     Example: a valid retirement plan
-        Given the following retirement plan
-            """# Retirement plan
+        Given the following content in `retirement_plan.md`
+            """
+        # Retirement plan
         ## RETIRE-1 - API
 
         This solutions' API (DS-3) can be retired by removing
@@ -30,8 +31,9 @@ Feature: FS-7 - retirement plan
         Then we get an error of a missing retirement plan
 
     Example: headings of the retirement plan must be of the form `# RETIRE-X - title`
-        Given the following retirement plan
-            """# Retirement plan
+        Given the following content in `retirement_plan.md`
+            """
+            # Retirement plan
             ## RET-1 - this
             """
         When we check its documentation

@@ -17,7 +17,8 @@ pub enum Spec {
     Design,
     Risks,
     Tests,
-    Manual,
+    UserManual,
+    OperatorManual,
     Retire,
 }
 
@@ -28,7 +29,8 @@ impl Spec {
             Spec::Design => "design_specification.md",
             Spec::Risks => "risk_assessment.md",
             Spec::Tests => "verification_plan.md",
-            Spec::Manual => "user_manual.md",
+            Spec::UserManual => "user_manual.md",
+            Spec::OperatorManual => "operator_manual.md",
             Spec::Retire => "retirement_plan.md",
         }
     }
@@ -56,6 +58,7 @@ pub struct Documents {
     risk_assessment: Document,
     verification_plan: Document,
     user_manual: Document,
+    operator_manual: Document,
     retirement_plan: Document,
 }
 
@@ -66,6 +69,7 @@ impl Documents {
         risk_assessment: Document,
         verification_plan: Document,
         user_manual: Document,
+        operator_manual: Document,
         retirement_plan: Document,
     ) -> Result<Self, Error> {
         check_documentation(
@@ -74,6 +78,7 @@ impl Documents {
             &risk_assessment,
             &design_specification,
             &user_manual,
+            &operator_manual,
             &retirement_plan,
         )?;
         Ok(Self {
@@ -82,6 +87,7 @@ impl Documents {
             risk_assessment,
             verification_plan,
             user_manual,
+            operator_manual,
             retirement_plan,
         })
     }
@@ -110,7 +116,8 @@ fn parse(markdown_input: &str, spec: Spec) -> (Trace, Vec<String>) {
         Spec::Design => "Design specification",
         Spec::Tests => "Verification plan",
         Spec::Risks => "Risk assessment",
-        Spec::Manual => "User manual",
+        Spec::UserManual => "User manual",
+        Spec::OperatorManual => "Operator manual",
         Spec::Retire => "Retirement plan",
         Spec::Requirements => unreachable!(),
     };
@@ -233,10 +240,16 @@ fn check_ids<'a, I: Iterator<Item = &'a String> + Clone>(headings: I, spec: Spec
                 format!("Headings in verification plan must start with \"TEST-\". \"{heading}\" does not.")
             })
             .collect(),
-        Spec::Manual => headings
+        Spec::UserManual => headings
             .filter(|heading| !heading.starts_with("USER-"))
             .map(|heading| {
                 format!("Headings in user manual must start with \"USER-\". \"{heading}\" does not.")
+            })
+            .collect(),
+        Spec::OperatorManual => headings
+            .filter(|heading| !heading.starts_with("OPERATOR-"))
+            .map(|heading| {
+                format!("Headings in operator manual must start with \"OPERATOR-\". \"{heading}\" does not.")
             })
             .collect(),
         Spec::Retire => headings
@@ -285,6 +298,7 @@ fn check_documentation(
     risk_assessment: &Document,
     design_specification: &Document,
     user_manual: &Document,
+    operator_manual: &Document,
     retirement_plan: &Document,
 ) -> Result<(), Error> {
     let mut errors = vec![];
@@ -294,6 +308,7 @@ fn check_documentation(
     let designs = &design_specification.trace;
     let requirements = &requirements;
     let user_manual = &user_manual.trace;
+    let operator_manual = &operator_manual.trace;
     let retirement_plan = &retirement_plan.trace;
 
     let mut uncovered_requirements = requirements.keys().collect::<IndexSet<_>>();
@@ -367,6 +382,14 @@ fn check_documentation(
         if !values.is_empty() {
             errors.push(format!(
                 "Retirement plan cannot be traced, but {retire} is traced to something else"
+            ));
+        }
+    }
+
+    for (operator, values) in operator_manual {
+        if !values.is_empty() {
+            errors.push(format!(
+                "Retirement plan cannot be traced, but {operator} is traced to something else"
             ));
         }
     }

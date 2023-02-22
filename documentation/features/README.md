@@ -18,11 +18,14 @@ Gherkin. It is broadly composed by a set of requirements about:
 
 ## Required documents
 
-* [functional specification](./features/1_specification.feature)
-* [design specification](./features/2_design.feature)
-* [risk assessment](./features/3_risk.feature)
-* [verification plan](./features/4_test.feature)
-* [user manual](./features/6_user_manual.feature)
-* [retirement plan](./features/7_retirement.feature)
+* [functional specification](./1_specification.feature)
+* [design specification](./2_design.feature)
+* [risk assessment](./3_risk.feature)
+* [verification plan](./4_test.feature)
+* [operator manual](./5_operator_manual.feature)
+* [user manual](./6_user_manual.feature)
+* [retirement plan](./7_retirement.feature)
+
+## References
 
 [^1]: [GAMP 5 Guide 2nd Edition](https://ispe.org/publications/guidance-documents/gamp-5-guide-2nd-edition)

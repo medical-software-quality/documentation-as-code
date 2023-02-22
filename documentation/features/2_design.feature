@@ -63,7 +63,7 @@ Feature: FS-1 - something
         When something
         Then something else
             """
-        And the following verification plan
+        And the following content in `verification_plan.md`
             """
         # Verification plan
         ## TEST-1 - Example

@@ -57,10 +57,10 @@ Feature: FS-3 - solution must contain a risk assessment
   Example: risk assessment with a trace to existing features
     Given the following content in `risk_assessment.md`
       """
-    # Risk assessment
-    ## RISK-1 - Example
-    ### Trace
-    * FS-1
+      # Risk assessment
+      ## RISK-1 - Example
+      ### Trace
+      * FS-1
       """
     And the following feature
       """
@@ -69,12 +69,12 @@ Feature: FS-1 - something
     When something
     Then something else
       """
-    And the following verification plan
+    And the following content in `verification_plan.md`
       """
-        # Verification plan
-        ## TEST-1 - Placeholder
-        ### Trace
-        * FS-1
+    # Verification plan
+    ## TEST-1 - Placeholder
+    ### Trace
+    * FS-1
       """
     When we check its documentation
     Then we get no error
