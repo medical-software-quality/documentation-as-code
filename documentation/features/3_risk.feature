@@ -7,9 +7,9 @@ Feature: FS-3 - solution must contain a risk assessment
   Each of the risks must be described in terms of:
   - severity
   - discoverability
-  - mitigating actions
+  - mitigations
 
-  Note that only actual risks are required to be enumerated -
+  Note that only relevant risks are required to be enumerated -
   risks that have been significantly mitigated may not be part of the assessment.
   Note that risks are always assessed against the software specification.
 

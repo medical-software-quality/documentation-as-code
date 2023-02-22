@@ -19,4 +19,5 @@ The test results are stored on github actions' log, which can be found
 * FS-5
 * FS-6
 * FS-7
+* FS-8
 * RISK-1
