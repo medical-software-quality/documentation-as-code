@@ -1,4 +1,4 @@
-Feature: FS-5 - output to JSON
+Feature: FS-8 - output to JSON
     If no error is found, this solution must output the verified
     software's documentation as a valid JSON.
 
