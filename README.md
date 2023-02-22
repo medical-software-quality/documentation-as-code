@@ -1,5 +1,3 @@
-# Medical software documentation 
-
 This repository contains a specification to document medical software
 compliant with EMA[^1][^2] and FDA[^3][^4] requirements in a modern DevOps context
 with git, continuous integration and continuous deployment (CI/CD).
@@ -15,7 +13,7 @@ this specification.
 
 [^4]: [Draft Computer Software Assurance for Production and Quality System Software](https://www.fda.gov/regulatory-information/search-fda-guidance-documents/computer-software-assurance-production-and-quality-system-software)
 
-## Background
+# Background
 
 Quality assurance (QA) in medical software is a meticulous process comprising
 a significant number of hand-held activities
@@ -32,7 +30,7 @@ driven development (BDD).
 Almost paradoxically, although these processes seem incompatible in form, their objectives are
 the same: improve quality and reduce risk using a risk-based approach.
 
-### One organization with two practices
+## One organization with two practices
 
 The primary consequence of these two cultures is that organizations
 usually have 2 teams working in QA - "software QA", comprising
@@ -57,7 +55,7 @@ Overall, this makes audits and inspections assess a shadow process, resulting in
 a missed opportunity by all sides (development team, QA team and auditor) to improve
 overall patient safety, product quality and data integrity.
 
-### This repository - documentation as code
+## This repository - documentation as code
 
 This repository contains a specification to document software aimed at bridging the gap
 between the QA practiced by the pharmaceutical industry (governed by the corresponding governmantal bodies such as FDA and EMA) and the state of the art practices used in 
@@ -77,7 +75,7 @@ in this repository is "trivial". Often the barrier is found the teams'
 organization and knowledge and this repository is therefore aimed at reducing
 this barrier, not solving a difficult technical problem.
 
-### For software developers
+## For software developers
 
 If you are a software developer, DevOps engineer, or tech lead concerned that your QA is requesting too many word documents, excel sheets, wiki pages or PDFs
 that you know will either:
@@ -97,7 +95,7 @@ By adopting this specification, you are inviting your QA or validation lead to b
 part of the DevOps process whereby documentation, just like working tests, is a 
 requirement for releasable software.
 
-### For validation leads
+## For validation leads
 
 If you are a QA or validation lead concerned that developers do not engage in producing
 the necessary documentation of the software they develop, resulting in the "shadow process"
@@ -106,11 +104,11 @@ to document the solution they will significantly improve the collaboration and e
 of your team in the process, resulting in a overall higher quality of the software and its
 associated documentation.
 
-## How to use
+# How to use
 
 See [user manual](./documentation/user_manual.md).
 
-## Contribute and development notes
+# Contribute and development notes
 
 This is a standard Rust project.
 
@@ -133,10 +131,14 @@ docker build . -t quality
 docker run -v `pwd`/documentation:/documentation --rm quality --path /documentation
 ```
 
-## Versioning
+# Versioning
 
 This repository uses semantic versioning.
 
-## License
+# License
 
 This repository and all files on it are licensed according to the [LICENSE](LICENSE.md).
+
+# Contribution
+
+Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in the work by you, as defined in the license, shall be licensed as above, without any additional terms or conditions.
