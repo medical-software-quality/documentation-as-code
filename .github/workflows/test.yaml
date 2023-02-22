@@ -96,7 +96,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Check documentation
-        uses: jorgecarleitao/quality/.github/actions@v0.0.6
+        uses: medical-software-quality/documentation-as-code/.github/actions@main
         with:
           path: './documentation'
           github_token: ${{ secrets.GITHUB_TOKEN }}
