@@ -139,5 +139,4 @@ This repository uses semantic versioning.
 
 ## License
 
-This repository and all files on it are licensed according to the
-licence in [LICENSE](LICENSE.md) (Apache 2.0).
+This repository and all files on it are licensed according to the [LICENSE](LICENSE.md).
