@@ -1,10 +1,11 @@
 Feature: FS-4 - software verification plan
-  The plan to establish the software's intended use must exist in the form of a verification plan.
+  The plan to establish the software's fitness for intended purpose
+  must exist in the form of a verification plan.
 
   The verification plan must describe
   - how every requirement (described in FS-1) is tested
   - how each of the risks (described in FS-3) mitigated by tests is mitigated
-  - where is the evidence of the execution of the test stored
+  - where is the evidence of the execution of the tests stored
 
   The verification plan is documented in a single markdown file named `verification_plan.md`
   starting with `# Verification plan` and where each test is itemized by headings (h2).
@@ -12,7 +13,7 @@ Feature: FS-4 - software verification plan
   identifiers of existing requirements or risks, see examples below.
 
   All tests of the software must be described in this verification plan, and
-  this verification plan must only assess risks of this software.
+  this verification plan must only test this software.
   All requirements must be covered by tests.
 
   Example: a valid verification plan

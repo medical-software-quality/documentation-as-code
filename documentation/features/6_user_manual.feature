@@ -1,23 +1,23 @@
 Feature: FS-6 - solution must contain a user manual
-    The software's manual must exist.
+    The software's user manual must exist.
 
-    The user manual are documented in a single markdown file named `user_manual.md`
-    starting with `# User manual` and where each user persona is itemized by headings (h2).
+    The user manual is documented in a single markdown file named `user_manual.md`
+    starting with `# User manual` and where each persona is itemized by headings (h2).
 
-    The complete user manual of the software must be specified as above, and
+    Besides the software itself, this manual must be the only place where usage is described, and
     the user manual must only describe how to use this software.
 
     Example: a valid user manual
         Given the following content in `user_manual.md`
             """
-      # User manual
-      ## USER-1 - Principal Investigator
+            # User manual
+            ## USER-1 - Principal Investigator
 
-      As a principal investigator, you access the overview of your sites via "site overview" on the
-      header of the initial page.
+            As a principal investigator, you access the overview of your sites via "site overview" on the
+            header of the initial page.
 
-      When pressed, you can search, filter and sort present and past study deviations. Select individual
-      deviations to open their audit trail.
+            If pressed, you can search, filter and sort present and past study deviations. Select individual
+            deviations to open their audit trail.
             """
         When we check its documentation
         Then we get no error
@@ -30,8 +30,8 @@ Feature: FS-6 - solution must contain a user manual
     Example: headings of the user manual must be of the form `# USER-X - title`
         Given the following content in `user_manual.md`
             """
-      # User manual
-      ## STEP-1 - this
+            # User manual
+            ## STEP-1 - this
             """
         When we check its documentation
         Then we get an error of an incorrect user manual
@@ -39,10 +39,10 @@ Feature: FS-6 - solution must contain a user manual
     Example: user manual with a trace to existing feature
         Given the following content in `user_manual.md`
             """
-    # User manual
-    ## USER-1 - Example
-    ### Trace
-    * FS-1
+        # User manual
+        ## USER-1 - Example
+        ### Trace
+        * FS-1
             """
         And the following content in `risk_assessment.md`
             """
@@ -54,9 +54,9 @@ Feature: FS-6 - solution must contain a user manual
         And the following feature
             """
 Feature: FS-1 - something
-  Scenario: Something
-    When something
-    Then something else
+    Scenario: Something
+        When something
+        Then something else
             """
         And the following verification plan
             """
@@ -71,10 +71,10 @@ Feature: FS-1 - something
     Example: user manual with a trace to a non-existing feature
         Given the following content in `user_manual.md`
             """
-    # User manual
-    ## USER-1 - Example
-    ### Trace
-    * FS-1
+        # User manual
+        ## USER-1 - Example
+        ### Trace
+        * FS-1
             """
         When we check its documentation
         Then we get an error regarding a wrong trace in user manual
