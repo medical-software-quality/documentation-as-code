@@ -8,8 +8,8 @@ Under this specification, software documentation is written in
 [Markdown](https://en.wikipedia.org/wiki/Markdown) and [Gherkin](https://cucumber.io/docs/gherkin/)
 in the same git repository containing the CI/CD code used to deploy the software to a production environment.
 
-This specification fulfills its own specification, meaning that it is itself written in Markdown and 
-Gherkin. It is broadly composed by a set of requirements about:
+This specification fulfills its own specification, meaning that it is itself written
+in Markdown and Gherkin. It is broadly composed by a set of requirements about:
 
 * which documents must exist
 * where they should be located

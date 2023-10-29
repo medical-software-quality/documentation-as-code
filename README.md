@@ -57,9 +57,11 @@ overall patient safety, product quality and data integrity.
 
 ## This repository - documentation as code
 
-This repository contains a specification to document software aimed at bridging the gap
-between the QA practiced by the pharmaceutical industry (governed by the corresponding governmantal bodies such as FDA and EMA) and the state of the art practices used in 
-the software industry.
+This repository contains [a specification](./documentation/features/README.md) to
+document software aimed at bridging the gap between the QA practiced by
+the pharmaceutical industry
+(governed by the corresponding governmantal bodies such as FDA and EMA)
+and the state of the art practices used in the software industry.
 
 By adereing to this specification, documentation management becomes part
 of the development process, enabling the process of producing, versioning,
