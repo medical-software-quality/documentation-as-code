@@ -1,6 +1,8 @@
 Feature: FS-6 - solution must contain a user manual
     The software's user manual must exist.
 
+    The user manual should describe how the user is expected to use the software or application.
+
     The user manual is documented in a single markdown file named `user_manual.md`
     starting with `# User manual` and where each persona is itemized by headings (h2).
 

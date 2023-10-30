@@ -1,7 +1,14 @@
 Feature: FS-5 - solution must contain an operator manual
-    The software's operator manual must exist.
+    The software's operator manual must exist to ensure that the software's fitness
+    for use is guaranteed throughout the software's lifetime.
 
-    The operator manual must contain the different roles and responsibilities of the
+    The operator manual should include, when applicable,
+    - how to perform pro-active or preventive monitoring activities
+    - how to perform access review activites
+    - how to perform security reviews
+    - what are and how to perform standard changes (e.g. password rotation, configuration changes, etc.)
+
+    The operator manual must contain roles and responsibilities of the
     personas operating the application.
 
     The operator manual is a single markdown file named `operator_manual.md`
