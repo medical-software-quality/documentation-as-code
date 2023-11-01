@@ -1,3 +1,5 @@
+name: Test, build and release
+
 on:
   release:
     types: [created]
@@ -21,7 +23,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
   test:
-    name: Test
+    name: TEST-1
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -36,6 +38,7 @@ jobs:
   build-and-publish-image:
     name: Publish docker image
     runs-on: ubuntu-latest
+    # pre-condition in TEST-1
     needs: test
     permissions:
       contents: read
@@ -72,6 +75,7 @@ jobs:
   build-and-publish-binaries:
     permissions: write-all
     name: Publish binary (${{ matrix.target }})
+    # pre-condition in TEST-1
     needs: test
     if: github.event_name == 'release'
     runs-on: ubuntu-latest
