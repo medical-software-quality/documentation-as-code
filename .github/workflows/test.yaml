@@ -64,6 +64,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
 
   build-and-publish-binaries:
+    permissions: write-all
     name: Publish binary (${{ matrix.target }})
     needs: test
     if: github.event_name == 'release'
