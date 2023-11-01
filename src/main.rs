@@ -68,7 +68,7 @@ fn main() -> ExitCode {
         Ok(documents) => documents,
         Err(Error(errors)) => {
             for error in errors {
-                println!("ERROR: {error}");
+                eprintln!("ERROR: {error}");
             }
             return ExitCode::FAILURE;
         }
