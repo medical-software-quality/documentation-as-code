@@ -12,6 +12,10 @@ inputs:
     description: "The name of the output artifact"
     required: false
     default: "documentation.json"
+  version:
+    description: "Version of the checker. Defaults to github.action_ref"
+    required: false
+    default: ${{ github.action_ref }}
 runs:
   using: "composite"
   steps:
@@ -27,7 +31,7 @@ runs:
         TOKEN: ${{ inputs.token }}
         ORG: medical-software-quality
         REPOSITORY: documentation-as-code
-        VERSION: ${{ github.action_ref }}
+        VERSION: ${{ inputs.version }}
     - name: Check documentation
       shell: bash
       run: ./quality --path ${{ inputs.path }} > documentation.json
