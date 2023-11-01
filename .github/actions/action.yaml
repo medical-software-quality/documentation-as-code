@@ -2,12 +2,16 @@ name: "Check documentation"
 description: "Verifies that the documentation fullfils the specification"
 inputs:
   token:
-    description: 'The GitHub token.'
+    description: 'The GitHub token'
     required: false
     default: ${{ github.token }}
   path:
     description: "The directory with the documentation"
     required: true
+  artifact:
+    description: "The name of the output artifact"
+    required: false
+    default: "documentation.json"
 runs:
   using: "composite"
   steps:
@@ -26,4 +30,9 @@ runs:
         VERSION: ${{ github.action_ref }}
     - name: Check documentation
       shell: bash
-      run: ./quality --path ${{ inputs.path }}
+      run: ./quality --path ${{ inputs.path }} > documentation.json
+    - uses: actions/upload-artifact@v3
+      with:
+        name: documentation
+        path: ${{ inputs.artifact }}
+

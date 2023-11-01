@@ -166,14 +166,14 @@ fn check_docs(w: &mut World) {
 
 #[then("we get an error of a missing risk assessment file")]
 fn missing_risk(w: &mut World) {
-    command(&w.path).assert().failure().stdout(
+    command(&w.path).assert().failure().stderr(
         predicates::str::contains("ERROR").and(predicates::str::contains("risk_assessment.md")),
     );
 }
 
 #[then("we get an error of a missing design specification")]
 fn missing_design(w: &mut World) {
-    command(&w.path).assert().failure().stdout(
+    command(&w.path).assert().failure().stderr(
         predicates::str::contains("ERROR")
             .and(predicates::str::contains("design_specification.md")),
     );
@@ -181,28 +181,28 @@ fn missing_design(w: &mut World) {
 
 #[then("we get an error of a missing retirement plan")]
 fn missing_retirement(w: &mut World) {
-    command(&w.path).assert().failure().stdout(
+    command(&w.path).assert().failure().stderr(
         predicates::str::contains("ERROR").and(predicates::str::contains("retirement_plan.md")),
     );
 }
 
 #[then("we get an error of a missing verification plan")]
 fn missing_verification(w: &mut World) {
-    command(&w.path).assert().failure().stdout(
+    command(&w.path).assert().failure().stderr(
         predicates::str::contains("ERROR").and(predicates::str::contains("verification_plan.md")),
     );
 }
 
 #[then("we get an error of a missing user manual file")]
 fn missing_user_manual(w: &mut World) {
-    command(&w.path).assert().failure().stdout(
+    command(&w.path).assert().failure().stderr(
         predicates::str::contains("ERROR").and(predicates::str::contains("user_manual.md")),
     );
 }
 
 #[then("we get an error of a missing operator manual file")]
 fn missing_operator_manual(w: &mut World) {
-    command(&w.path).assert().failure().stdout(
+    command(&w.path).assert().failure().stderr(
         predicates::str::contains("ERROR").and(predicates::str::contains("operator_manual.md")),
     );
 }
@@ -212,7 +212,7 @@ fn check_fails_identifier_risk(w: &mut World) {
     command(&w.path)
         .assert()
         .failure()
-        .stdout(
+        .stderr(
             predicates::str::contains("ERROR").and(predicates::str::contains(
                 "Headings in risk assessment must start with \"RISK-\".",
             )),
@@ -224,7 +224,7 @@ fn check_fails_identifier_design(w: &mut World) {
     command(&w.path)
         .assert()
         .failure()
-        .stdout(
+        .stderr(
             predicates::str::contains("ERROR").and(predicates::str::contains(
                 "Headings in design specification must start with \"DS-\".",
             )),
@@ -236,7 +236,7 @@ fn then_missing_header_in_design(w: &mut World) {
     command(&w.path)
         .assert()
         .failure()
-        .stdout(
+        .stderr(
             predicates::str::contains("ERROR").and(predicates::str::contains(
                 "\"design_specification.md\" must start with \"# Design specification\" but starts with \"# Design statement\"",
             )),
@@ -248,7 +248,7 @@ fn check_fails_identifier_verification(w: &mut World) {
     command(&w.path)
         .assert()
         .failure()
-        .stdout(
+        .stderr(
             predicates::str::contains("ERROR").and(predicates::str::contains(
                 "Headings in verification plan must start with \"TEST-\".",
             )),
@@ -260,7 +260,7 @@ fn check_fails_identifier_user_manual(w: &mut World) {
     command(&w.path)
         .assert()
         .failure()
-        .stdout(
+        .stderr(
             predicates::str::contains("ERROR").and(predicates::str::contains(
                 "Headings in user manual must start with \"USER-\".",
             )),
@@ -272,7 +272,7 @@ fn check_fails_identifier_operator_manual(w: &mut World) {
     command(&w.path)
         .assert()
         .failure()
-        .stdout(
+        .stderr(
             predicates::str::contains("ERROR").and(predicates::str::contains(
                 "Headings in operator manual must start with \"OPERATOR-\".",
             )),
@@ -284,7 +284,7 @@ fn check_fails_identifier_retirement_plan(w: &mut World) {
     command(&w.path)
         .assert()
         .failure()
-        .stdout(
+        .stderr(
             predicates::str::contains("ERROR").and(predicates::str::contains(
                 "Headings in retirement plan must start with \"RETIRE-\".",
             )),
@@ -296,7 +296,7 @@ fn check_fails_specification(w: &mut World) {
     command(&w.path)
         .assert()
         .failure()
-        .stdout(predicates::str::contains("/features"));
+        .stderr(predicates::str::contains("/features"));
 }
 
 #[then("we get an error regarding a wrong identifier")]
@@ -304,7 +304,7 @@ fn check_fails_identifier(w: &mut World) {
     command(&w.path)
         .assert()
         .failure()
-        .stdout(
+        .stderr(
             predicates::str::contains("ERROR").and(predicates::str::contains(
                 "Every feature's title must be of the form \"FS-<id> - <title>\"",
             )),
@@ -316,7 +316,7 @@ fn check_fails_identifier_trace_risk(w: &mut World) {
     command(&w.path)
         .assert()
         .failure()
-        .stdout(
+        .stderr(
             predicates::str::contains("ERROR").and(predicates::str::contains(
                 "Risks can only be traced to existing requirements or designs, but RISK-1 traces to something else",
             )),
@@ -328,7 +328,7 @@ fn check_fails_identifier_trace_design(w: &mut World) {
     command(&w.path)
         .assert()
         .failure()
-        .stdout(
+        .stderr(
             predicates::str::contains("ERROR").and(predicates::str::contains(
                 "Designs can only be traced to existing requirements, but DS-1 is traced to something else",
             )),
@@ -340,7 +340,7 @@ fn check_fails_identifier_trace_verification(w: &mut World) {
     command(&w.path)
         .assert()
         .failure()
-        .stdout(
+        .stderr(
             predicates::str::contains("ERROR").and(predicates::str::contains(
                 "Tests can only be traced to existing risks or requirements, but TEST-1 is traced to something else",
             )),
@@ -352,7 +352,7 @@ fn check_fails_identifier_trace_manual(w: &mut World) {
     command(&w.path)
         .assert()
         .failure()
-        .stdout(
+        .stderr(
             predicates::str::contains("ERROR").and(predicates::str::contains(
                 "Users can only be traced to existing requirements, but USER-1 is traced to something else",
             )),
@@ -364,7 +364,7 @@ fn check_fails_gherkin(w: &mut World) {
     command(&w.path)
         .assert()
         .failure()
-        .stdout(predicates::str::contains("ERROR"));
+        .stderr(predicates::str::contains("ERROR"));
 }
 
 #[then("we get no error")]
