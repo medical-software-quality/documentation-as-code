@@ -3,55 +3,7 @@ use std::process::ExitCode;
 
 use clap::Parser;
 
-mod files;
-mod specification;
-
-use specification::*;
-
-fn get_document(project: PathBuf, spec: Spec, errors: &mut Vec<String>) -> Option<Document> {
-    let path = project.join(spec.file_name());
-
-    let content = match files::read_file(path) {
-        Ok(content) => content,
-        Err(error) => {
-            errors.push(error);
-            return None;
-        }
-    };
-    match Document::try_new(content, spec) {
-        Ok(document) => Some(document),
-        Err(Error(new_errors)) => {
-            errors.extend(new_errors);
-            None
-        }
-    }
-}
-
-fn get_documents(project: PathBuf) -> Result<Documents, Error> {
-    let mut errors = vec![];
-
-    let requirements = get_specification(project.clone(), &mut errors);
-    let design = get_document(project.clone(), Spec::Design, &mut errors);
-    let risk_assessment = get_document(project.clone(), Spec::Risks, &mut errors);
-    let verification_plan = get_document(project.clone(), Spec::Tests, &mut errors);
-    let user_manual = get_document(project.clone(), Spec::UserManual, &mut errors);
-    let operator_manual = get_document(project.clone(), Spec::OperatorManual, &mut errors);
-    let retirement_plan = get_document(project, Spec::Retire, &mut errors);
-
-    if errors.is_empty() {
-        Documents::try_new(
-            requirements,
-            design.unwrap(),
-            risk_assessment.unwrap(),
-            verification_plan.unwrap(),
-            user_manual.unwrap(),
-            operator_manual.unwrap(),
-            retirement_plan.unwrap(),
-        )
-    } else {
-        Err(Error(errors))
-    }
-}
+use documentation_as_code_gxp::*;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
