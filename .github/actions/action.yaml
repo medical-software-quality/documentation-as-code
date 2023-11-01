@@ -1,24 +1,29 @@
-name: "Test"
-description: "description"
+name: "Check documentation"
+description: "Verifies that the documentation fullfils the specification"
 inputs:
+  token:
+    description: 'The GitHub token.'
+    required: false
+    default: ${{ github.token }}
   path:
-    description: "The path to the documentation"
-    required: true
-  github_token:
-    description: "The GITHUB_TOKEN used to retrieve the pipeline"
+    description: "The directory with the documentation"
     required: true
 runs:
   using: "composite"
   steps:
-    - name: Check documentation
+    - name: Download documentation checker
       run: |
-        set -eo pipefail
-        REPOSITORY=medical-software-quality/documentation-as-code
-        ASSET_URL=$(curl -H 'Authorization: Bearer ${{ inputs.github_token }}' https://api.github.com/repos/$REPOSITORY/releases/tags/$VERSION | jq '.assets | .[] | select(.name | endswith("unknown-linux-musl.tar.xz")) | .url' -r)
-        curl -sL -H 'Accept: application/octet-stream' -H 'Authorization: Bearer ${{ inputs.github_token }}' $ASSET_URL > unknown-linux-musl.tar.gz
+        set -eou pipefail
+        ASSET_URL="https://github.com/${ORG}/${REPOSITORY}/releases/download/$VERSION/${REPOSITORY}_${VERSION}_x86_64-unknown-linux-musl.tar.xz"
+        curl -sL -H 'Accept: application/octet-stream' -H 'Authorization: Bearer ${TOKEN}' ${ASSET_URL} > unknown-linux-musl.tar.gz
         tar -xf unknown-linux-musl.tar.gz
         rm -rf unknown-linux-musl.tar.gz
-        ./quality --path ${{ inputs.path }}
       shell: bash
       env:
+        TOKEN: ${{ inputs.token }}
+        ORG: medical-software-quality
+        REPOSITORY: documentation-as-code
         VERSION: ${{ github.action_ref }}
+    - name: Check documentation
+      shell: bash
+      run: ./quality --path ${{ inputs.path }}
