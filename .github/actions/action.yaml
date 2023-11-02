@@ -11,7 +11,7 @@ inputs:
   artifact:
     description: "The name of the output artifact"
     required: false
-    default: "documentation.json"
+    default: "documentation"
   version:
     description: "Version of the checker. Defaults to github.action_ref"
     required: false
@@ -37,6 +37,6 @@ runs:
       run: ./quality --path ${{ inputs.path }} > documentation.json
     - uses: actions/upload-artifact@v3
       with:
-        name: documentation
-        path: ${{ inputs.artifact }}
+        name: ${{ inputs.artifact }}
+        path: documentation.json
 
