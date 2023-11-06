@@ -9,29 +9,36 @@ use serde::Serialize;
 
 use super::files;
 
+/// Sequence of errors
 pub struct Error(pub Vec<String>);
 
+/// Every specification document.
 #[derive(Debug, Clone, Copy)]
-pub enum Spec {
-    Requirements,
+pub enum DocumentType {
+    //Requirements,
     Design,
     Risks,
     Tests,
     UserManual,
     OperatorManual,
-    Retire,
+    RetirementPlan,
 }
 
-impl Spec {
+enum SpecificationType {
+    Requirements,
+    Document(DocumentType),
+}
+
+impl DocumentType {
+    /// Returns the name
     pub fn file_name(&self) -> &'static str {
         match self {
-            Spec::Requirements => unreachable!(),
-            Spec::Design => "design_specification.md",
-            Spec::Risks => "risk_assessment.md",
-            Spec::Tests => "verification_plan.md",
-            Spec::UserManual => "user_manual.md",
-            Spec::OperatorManual => "operator_manual.md",
-            Spec::Retire => "retirement_plan.md",
+            DocumentType::Design => "design_specification.md",
+            DocumentType::Risks => "risk_assessment.md",
+            DocumentType::Tests => "verification_plan.md",
+            DocumentType::UserManual => "user_manual.md",
+            DocumentType::OperatorManual => "operator_manual.md",
+            DocumentType::RetirementPlan => "retirement_plan.md",
         }
     }
 }
@@ -42,12 +49,12 @@ pub type Requirements = IndexMap<String, String>;
 #[derive(Debug, Serialize, Default)]
 pub struct Document {
     text: String, // markdown
-    trace: Trace,
+    trace: Trace, // parsed trace
 }
 
 impl Document {
-    pub fn try_new(text: String, spec: Spec) -> Result<Self, Error> {
-        get_trace(&text, spec).map(|trace| Self { text, trace })
+    pub fn try_new(text: String, type_: DocumentType) -> Result<Self, Error> {
+        get_trace(&text, type_).map(|trace| Self { text, trace })
     }
 }
 
@@ -111,15 +118,14 @@ enum TraceState {
     Item,
 }
 
-fn parse(markdown_input: &str, spec: Spec) -> (Trace, Vec<String>) {
-    let expected_title = match spec {
-        Spec::Design => "Design specification",
-        Spec::Tests => "Verification plan",
-        Spec::Risks => "Risk assessment",
-        Spec::UserManual => "User manual",
-        Spec::OperatorManual => "Operator manual",
-        Spec::Retire => "Retirement plan",
-        Spec::Requirements => unreachable!(),
+fn parse(markdown_input: &str, type_: DocumentType) -> (Trace, Vec<String>) {
+    let expected_title = match type_ {
+        DocumentType::Design => "Design specification",
+        DocumentType::Tests => "Verification plan",
+        DocumentType::Risks => "Risk assessment",
+        DocumentType::UserManual => "User manual",
+        DocumentType::OperatorManual => "Operator manual",
+        DocumentType::RetirementPlan => "Retirement plan",
     };
 
     let parser = Parser::new(markdown_input);
@@ -136,7 +142,7 @@ fn parse(markdown_input: &str, spec: Spec) -> (Trace, Vec<String>) {
             if has_title {
                 errors.push(format!(
                     "\"{}\" must contain a single title (#) with \"# {expected_title}\" but it contains at least two titles.",
-                    spec.file_name(),
+                    type_.file_name(),
                 ))
             }
             has_title = true;
@@ -145,7 +151,7 @@ fn parse(markdown_input: &str, spec: Spec) -> (Trace, Vec<String>) {
             if inner.as_bytes() != expected_title.as_bytes() {
                 errors.push(format!(
                     "\"{}\" must start with \"# {expected_title}\" but starts with \"# {inner}\"",
-                    spec.file_name(),
+                    type_.file_name(),
                 ))
             }
         }
@@ -159,10 +165,10 @@ fn parse(markdown_input: &str, spec: Spec) -> (Trace, Vec<String>) {
             let id = extract_identifier(inner.as_ref());
             if let Some(id) = id {
                 if trace.insert(id.to_string(), Default::default()).is_some() {
-                    errors.push(format!("\"{}\" must contain unique identifiers, but \"{id}\" is not", spec.file_name()))
+                    errors.push(format!("\"{}\" must contain unique identifiers, but \"{id}\" is not", type_.file_name()))
                 }
             } else {
-                errors.push(format!("\"{}\" must contain sections of the form \"## ID - title\", but \"{inner}\" is not in this form", spec.file_name()))
+                errors.push(format!("\"{}\" must contain sections of the form \"## ID - title\", but \"{inner}\" is not in this form", type_.file_name()))
             }
         }
         Event::End(Tag::Heading(HeadingLevel::H2, _, _)) => {
@@ -207,52 +213,55 @@ fn parse(markdown_input: &str, spec: Spec) -> (Trace, Vec<String>) {
     if !has_title {
         errors.push(format!(
             "\"{}\" must start with \"# {expected_title}\", but the document has no title",
-            spec.file_name(),
+            type_.file_name(),
         ))
     }
 
     (trace, errors)
 }
 
-fn check_ids<'a, I: Iterator<Item = &'a String> + Clone>(headings: I, spec: Spec) -> Vec<String> {
+fn check_ids<'a, I: Iterator<Item = &'a String> + Clone>(
+    headings: I,
+    spec: SpecificationType,
+) -> Vec<String> {
     let errors: Vec<String> = match spec {
-        Spec::Requirements => headings
+        SpecificationType::Requirements => headings
             .filter(|heading| !heading.starts_with("FS-"))
             .map(|heading| {
                 format!("Headings in requirements must start with \"FS-\". \"{heading}\" does not.")
             })
             .collect(),
-        Spec::Design => headings
+        SpecificationType::Document(DocumentType::Design) => headings
             .filter(|heading| !heading.starts_with("DS-"))
             .map(|heading| {
                 format!("Headings in design specification must start with \"DS-\". \"{heading}\" does not.")
             })
             .collect(),
-        Spec::Risks => headings
+            SpecificationType::Document(DocumentType::Risks) => headings
             .filter(|heading| !heading.starts_with("RISK-"))
             .map(|heading| {
                 format!("Headings in risk assessment must start with \"RISK-\". \"{heading}\" does not.")
             })
             .collect(),
-        Spec::Tests => headings
+            SpecificationType::Document(DocumentType::Tests) => headings
             .filter(|heading| !heading.starts_with("TEST-"))
             .map(|heading| {
                 format!("Headings in verification plan must start with \"TEST-\". \"{heading}\" does not.")
             })
             .collect(),
-        Spec::UserManual => headings
+        SpecificationType::Document(DocumentType::UserManual) => headings
             .filter(|heading| !heading.starts_with("USER-"))
             .map(|heading| {
                 format!("Headings in user manual must start with \"USER-\". \"{heading}\" does not.")
             })
             .collect(),
-        Spec::OperatorManual => headings
+        SpecificationType::Document(DocumentType::OperatorManual) => headings
             .filter(|heading| !heading.starts_with("OPERATOR-"))
             .map(|heading| {
                 format!("Headings in operator manual must start with \"OPERATOR-\". \"{heading}\" does not.")
             })
             .collect(),
-        Spec::Retire => headings
+            SpecificationType::Document(DocumentType::RetirementPlan) => headings
             .filter(|heading| !heading.starts_with("RETIRE-"))
             .map(|heading| {
                 format!("Headings in retirement plan must start with \"RETIRE-\". \"{heading}\" does not.")
@@ -279,10 +288,10 @@ fn check_trace(trace: &Trace) -> Vec<String> {
     errors
 }
 
-fn get_trace(content: &str, spec: Spec) -> Result<Trace, Error> {
-    let (trace, mut errors) = parse(content, spec);
+fn get_trace(content: &str, type_: DocumentType) -> Result<Trace, Error> {
+    let (trace, mut errors) = parse(content, type_);
 
-    errors.extend(check_ids(trace.keys(), spec));
+    errors.extend(check_ids(trace.keys(), SpecificationType::Document(type_)));
     errors.extend(check_trace(&trace));
 
     if errors.is_empty() {
@@ -452,7 +461,7 @@ pub fn get_specification(project: PathBuf, errors: &mut Vec<String>) -> IndexMap
             }
         });
 
-    errors.extend(check_ids(headings.keys(), Spec::Requirements));
+    errors.extend(check_ids(headings.keys(), SpecificationType::Requirements));
 
     headings
 }

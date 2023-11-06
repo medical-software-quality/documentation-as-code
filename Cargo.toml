@@ -1,7 +1,16 @@
 [package]
-name = "quality"
+name = "documentation-as-code"
+authors = ["Jorge C. Leitao <jorgecarleitao@gmail.com>"]
+homepage = "https://github.com/medical-software-quality/documentation-as-code"
+repository = "https://github.com/medical-software-quality/documentation-as-code"
+description = "A CI/CD tool to check documentation of software fit for GxP use"
+license = "MIT"
 version = "0.1.0"
 edition = "2021"
+
+[lib]
+name = "documentation_as_code_gxp"
+path = "src/lib.rs"
 
 [[bin]]
 name = "quality"
@@ -16,7 +25,7 @@ pulldown-cmark = {version = "0.9.2", default-features = false}
 regex = {version = "1", default-features = false, features = ["std"]}
 lazy_static = "1"
 clap = {version = "4", features = ["derive"]}
-gherkin = "*"
+gherkin = "0.14.0"
 indexmap = {version = "1", features = ["serde"]}
 serde = {version = "1", features = ["derive"]}
 serde_json = { version = "1", default-features = false, features = ["alloc"] }
